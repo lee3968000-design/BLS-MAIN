@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>High-Low Zero Master</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        body { font-family: 'Pretendard', sans-serif; display: flex; flex-direction: column; align-items: center; background: #f0f2f5; margin: 0; padding: 20px; }
+        .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 600px; text-align: center; }
+        .problem-box { background: #1a1a1a; color: #00ff00; padding: 30px; border-radius: 15px; font-size: 24px; font-weight: bold; margin: 20px 0; letter-spacing: 2px; min-height: 40px; }
+        #timer { font-size: 2.5rem; font-family: monospace; color: #ff3b30; margin-bottom: 20px; }
+        .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        input { padding: 15px; border-radius: 10px; border: 2px solid #ddd; font-size: 18px; outline: none; }
+        #ans_input { flex: 1; border-color: #007AFF; }
+        button { padding: 15px 25px; border-radius: 10px; border: none; background: #333; color: white; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button:hover { background: #000; transform: translateY(-2px); }
+        .log-container { margin-top: 20px; text-align: left; border-top: 2px solid #eee; padding-top: 20px; }
+        .log-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; }
+        .rules { font-size: 13px; color: #666; text-align: left; background: #fffde7; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #ffe082; }
+        
+        /* 홈 버튼 스타일 추가 */
+        .nav-header { width: 100%; text-align: left; margin-bottom: 10px; }
+        .home-btn { background: #555; padding: 10px 15px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="nav-header">
+        <button onclick="location.href='index.html'" class="home-btn">🏠 홈으로</button>
+    </div>
+
+    <h1>High-Low Zero</h1>
+    <div class="rules">
+        <b>규칙:</b> 다음 숫자가 [0 포함: <b>제로</b>] | [2배↑: <b>더블</b>] | [1/2배↓: <b>하프</b>] | [큼: <b>하이</b>] | [작음: <b>로우</b>]<br>
+        * 우선순위: 제로 > (더블/하프) > (하이/로우)
+    </div>
+
+    <div class="controls">
+        <input type="text" id="nick" value="플레이어" style="width:100px;">
+        <input type="number" id="prob_num" value="1" min="1" max="120" style="width:70px;">
+        <button onclick="startLevel()">문제 시작</button>
+    </div>
+
+    <div id="timer">00:00.00</div>
+    <div class="problem-box" id="numbers-display">번호를 선택하고 시작하세요</div>
+
+    <div class="input-group">
+        <input type="text" id="ans_input" placeholder="정답을 입력하세요 (띄어쓰기 무관)" onkeyup="if(window.event.keyCode==13)checkAnswer()">
+        <button onclick="checkAnswer()" style="background:#007AFF;">제출</button>
+    </div>
+
+    <div class="log-container" id="log-list">
+        <p style="text-align:center; color:#999;">기록이 여기에 표시됩니다.</p>
+    </div>
+</div>
+
+<script>
+    // Firebase 설정 (기존 설정 유지)
+    const firebaseConfig = {
+        apiKey: "AIzaSyDP7WJoqi9hWXO27KaeY9Lvitj-5-E0j5Y",
+        authDomain: "bsar5-d7818.firebaseapp.com",
+        databaseURL: "https://bsar5-d7818-default-rtdb.firebaseio.com",
+        projectId: "bsar5-d7818",
+        storageBucket: "bsar5-d7818.firebasestorage.app",
+        messagingSenderId: "377629207721",
+        appId: "1:377629207721:web:8b893496c0ac1749890db8"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let currentSolution1 = "", currentSolution2 = "";
+    let timerIdx = null, startT = 0;
+
+    // 문제 생성 엔진 (120개 고정)
+    function generateProblemSet(num) {
+        // 문제 번호별로 고정된 시드값 생성
+        let seed = num * 1234.567;
+        const random = () => {
+            seed = (seed * 16807) % 2147483647;
+            return (seed - 1) / 2147483646;
+        };
+
+        // 개수 결정: 1~15번은 5개, 16~30번은 6개... 106~120번은 12개
+        const count = 5 + Math.floor((num - 1) / 15);
+        let nums = [];
+        for(let i=0; i<count; i++) {
+            nums.push(Math.floor(random() * 200) + 1);
+        }
+
+        // 정답 계산
+        let solutions = [];
+        for(let i=0; i<nums.length-1; i++) {
+            let left = nums[i];
+            let right = nums[i+1];
+            let res = "";
+
+            if(String(right).includes('0')) res = "제로";
+            else if(right >= left * 2) res = "더블";
+            else if(right <= left * 0.5) res = "하프";
+            else if(right > left) res = "하이";
+            else res = "로우";
+            
+            solutions.push(res);
+        }
+
+        return {
+            nums: nums.join(" "),
+            ans1: solutions.join(""),
+            ans2: solutions.join(" ")
+        };
+    }
+
+    function startLevel() {
+        const num = document.getElementById('prob_num').value;
+        const prob = generateProblemSet(parseInt(num));
+        
+        document.getElementById('numbers-display').innerText = prob.nums;
+        currentSolution1 = prob.ans1;
+        currentSolution2 = prob.ans2;
+        
+        // 기록 불러오기
+        listenToLogs(num);
+
+        // 타이머 시작
+        if(timerIdx) clearInterval(timerIdx);
+        startT = Date.now();
+        timerIdx = setInterval(updateTimer, 50);
+        document.getElementById('ans_input').value = "";
+        document.getElementById('ans_input').focus();
+    }
+
+    function updateTimer() {
+        let d = Date.now()-startT;
+        let ms = String(d%1000).padStart(3,'0').slice(0,2);
+        let s = String(Math.floor(d/1000)%60).padStart(2,'0');
+        let m = String(Math.floor(d/60000)).padStart(2,'0');
+        document.getElementById('timer').innerText = `${m}:${s}.${ms}`;
+    }
+
+    function checkAnswer() {
+        const userAns = document.getElementById('ans_input').value.trim();
+        const time = document.getElementById('timer').innerText;
+        const num = document.getElementById('prob_num').value;
+        const nick = document.getElementById('nick').value;
+
+        if(userAns === currentSolution1 || userAns === currentSolution2) {
+            clearInterval(timerIdx);
+            alert(`정답입니다! 기록: ${time}`);
+            
+            // Firebase에 정답 기록 저장
+            db.ref(`highlow_logs/p${num}`).push({
+                n: nick,
+                t: time,
+                ts: firebase.database.ServerValue.TIMESTAMP
+            });
+        } else {
+            alert("오답입니다. 다시 생각해보세요!");
+        }
+    }
+
+    function listenToLogs(num) {
+        db.ref(`highlow_logs/p${num}`).orderByChild('t').limitToFirst(50).on('value', snap => {
+            let listEl = document.getElementById('log-list');
+            let h = `<strong>🏆 문제 ${num}번 명예의 전당 (빠른순)</strong><br>`;
+            let records = [];
+            snap.forEach(c => { records.push(c.val()); });
+
+            if(records.length === 0) h += "<p>아직 정답자가 없습니다.</p>";
+            
+            records.forEach((r, index) => {
+                h += `<div class="log-item">
+                        <span>${index + 1}. <b>${r.n}</b></span>
+                        <i>${r.t}</i>
+                      </div>`;
+            });
+            listEl.innerHTML = h;
+        });
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>카트 선호도 실시간 공유판</title>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; background-color: #f0f2f5; padding: 20px; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #1a73e8; margin-top: 0; }
+        .setter-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+        .name-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+        .name-grid input { width: 100%; padding: 5px; border: 1px solid #ccc; border-radius: 4px; font-size: 12px; box-sizing: border-box; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; font-size: 12px; }
+        th { background-color: #f1f3f5; }
+        .name-col { background-color: #e8f0fe; font-weight: bold; width: 80px; }
+        input[type="number"] { width: 45px; padding: 4px; text-align: center; }
+        .controls { margin-top: 30px; text-align: center; padding: 20px; background: #e8f0fe; border-radius: 8px; }
+        button { padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin: 0 5px; }
+        .btn-speed { background: #1a73e8; color: white; }
+        .btn-item { background: #e91e63; color: white; }
+        .result-box { margin-top: 30px; padding: 20px; border: 2px solid #eee; border-radius: 10px; display: none; }
+        .high-score { background-color: #d4edda !important; color: #155724; font-weight: bold; }
+        .low-score { background-color: #f8d7da !important; color: #721c24; }
+        .memo-area { width: 100%; height: 150px; margin-top: 10px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
+        .sort-btns { margin-bottom: 15px; text-align: right; }
+        .sort-btns button { background: #6c757d; color: white; font-size: 11px; }
+        
+        /* 홈 버튼 스타일 */
+        .home-btn { background-color: #333; color: white; padding: 8px 15px; margin-bottom: 20px; display: inline-block; text-decoration: none; border-radius: 5px; font-size: 14px; cursor: pointer; border: none; }
+        .home-btn:hover { background-color: #555; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <button onclick="location.href='index.html'" class="home-btn">🏠 홈으로</button>
+
+    <h1>🏎️ 종목 선호도 실시간 공유 🎁</h1>
+
+    <div class="setter-container">
+        <div class="setter-box">
+            <h3>🏁 스피드전 종목명</h3>
+            <div class="name-grid" id="s-names"></div>
+        </div>
+        <div class="setter-box">
+            <h3>📦 아이템전 종목명</h3>
+            <div class="name-grid" id="i-names"></div>
+        </div>
+    </div>
+
+    <h2>🏎️ 스피드전 (1~10점)</h2>
+    <div style="overflow-x:auto">
+        <table>
+            <thead><tr id="h-speed"><th>이름</th></tr></thead>
+            <tbody id="b-speed"></tbody>
+        </table>
+    </div>
+
+    <h2>🎁 아이템전 (1~10점)</h2>
+    <div style="overflow-x:auto">
+        <table>
+            <thead><tr id="h-item"><th>이름</th></tr></thead>
+            <tbody id="b-item"></tbody>
+        </table>
+    </div>
+
+    <div class="controls">
+        <p>분석 인원 (쉼표 구분): <input type="text" id="target-names" placeholder="비우면 전체"></p>
+        <button class="btn-speed" onclick="analyze('speed')">🏎️ 스피드전 분석</button>
+        <button class="btn-item" onclick="analyze('item')">🎁 아이템전 분석</button>
+    </div>
+
+    <div id="result-area" class="result-box">
+        <h2 id="res-title">분석 결과</h2>
+        <div class="sort-btns">
+            <button onclick="renderAnalysis('default')">기본순</button>
+            <button onclick="renderAnalysis('desc')">평균 높은순 ▲</button>
+            <button onclick="renderAnalysis('asc')">평균 낮은순 ▼</button>
+        </div>
+        <div id="res-content"></div>
+    </div>
+
+    <hr style="margin:40px 0;">
+    <h2>📝 실시간 공통 메모장</h2>
+    <textarea id="main-memo" class="memo-area" placeholder="여기에 규칙이나 공지사항을 적으세요. 실시간으로 공유됩니다."></textarea>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDP7WJoqi9hWXO27KaeY9Lvitj-5-E0j5Y",
+        authDomain: "bsar5-d7818.firebaseapp.com",
+        databaseURL: "https://bsar5-d7818-default-rtdb.firebaseio.com",
+        projectId: "bsar5-d7818",
+        storageBucket: "bsar5-d7818.firebasestorage.app",
+        messagingSenderId: "377629207721",
+        appId: "1:377629207721:web:8b893496c0ac1749890db8",
+        measurementId: "G-M9FJXYTS3F"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const players = ["한빈", "도감", "문스", "섭좀", "블스"];
+    let lastAnalysis = { mode: '', data: [] };
+
+    // 화면 초기화
+    function init() {
+        const sNames = document.getElementById('s-names');
+        const iNames = document.getElementById('i-names');
+        
+        for(let i=1; i<=12; i++) {
+            sNames.innerHTML += `<input type="text" class="sn" data-idx="${i}" placeholder="스피드 ${i}" onchange="saveData('names')">`;
+            iNames.innerHTML += `<input type="text" class="in" data-idx="${i}" placeholder="아이템 ${i}" onchange="saveData('names')">`;
+            document.getElementById('h-speed').innerHTML += `<th id="th-s-${i}">S${i}</th>`;
+            document.getElementById('h-item').innerHTML += `<th id="th-i-${i}">I${i}</th>`;
+        }
+
+        players.forEach(p => {
+            let rowS = `<td class="name-col">${p}</td>`, rowI = `<td class="name-col">${p}</td>`;
+            for(let i=1; i<=12; i++) {
+                rowS += `<td><input type="number" class="v-s-${p}" data-idx="${i}" value="5" onchange="saveData('scores')"></td>`;
+                rowI += `<td><input type="number" class="v-i-${p}" data-idx="${i}" value="5" onchange="saveData('scores')"></td>`;
+            }
+            document.getElementById('b-speed').innerHTML += `<tr>${rowS}</tr>`;
+            document.getElementById('b-item').innerHTML += `<tr>${rowI}</tr>`;
+        });
+    }
+
+    // 데이터 저장 (Firebase로 전송)
+    window.saveData = function(type) {
+        const data = {};
+        if(type === 'names' || type === 'all') {
+            data.sNames = Array.from(document.querySelectorAll('.sn')).map(el => el.value);
+            data.iNames = Array.from(document.querySelectorAll('.in')).map(el => el.value);
+        }
+        if(type === 'scores' || type === 'all') {
+            players.forEach(p => {
+                data[`score_s_${p}`] = Array.from(document.querySelectorAll(`.v-s-${p}`)).map(el => el.value);
+                data[`score_i_${p}`] = Array.from(document.querySelectorAll(`.v-i-${p}`)).map(el => el.value);
+            });
+        }
+        update(ref(db, 'kartData/'), data);
+    };
+
+    // 메모장 저장
+    document.getElementById('main-memo').addEventListener('input', (e) => {
+        set(ref(db, 'kartData/memo'), e.target.value);
+    });
+
+    // 데이터 불러오기 및 실시간 반영
+    onValue(ref(db, 'kartData/'), (snapshot) => {
+        const data = snapshot.val();
+        if(!data) return;
+
+        if(data.sNames) data.sNames.forEach((n, i) => { 
+            document.querySelectorAll('.sn')[i].value = n;
+            document.getElementById(`th-s-${i+1}`).innerText = n || `S${i+1}`;
+        });
+        if(data.iNames) data.iNames.forEach((n, i) => { 
+            document.querySelectorAll('.in')[i].value = n;
+            document.getElementById(`th-i-${i+1}`).innerText = n || `I${i+1}`;
+        });
+        players.forEach(p => {
+            if(data[`score_s_${p}`]) data[`score_s_${p}`].forEach((v, i) => document.querySelectorAll(`.v-s-${p}`)[i].value = v);
+            if(data[`score_i_${p}`]) data[`score_i_${p}`].forEach((v, i) => document.querySelectorAll(`.v-i-${p}`)[i].value = v);
+        });
+        if(data.memo !== undefined) document.getElementById('main-memo').value = data.memo;
+    });
+
+    // 분석 기능
+    window.analyze = function(mode) {
+        const targets = document.getElementById('target-names').value.split(',').map(v => v.trim()).filter(v => v);
+        const selected = targets.length > 0 ? targets : players;
+        const names = Array.from(document.querySelectorAll(mode === 'speed' ? '.sn' : '.in')).map((el, i) => el.value || `${mode}${i+1}`);
+        
+        let results = [];
+        for(let i=1; i<=12; i++) {
+            let sum = 0, allH = true, allL = true;
+            selected.forEach(p => {
+                const v = parseInt(document.querySelector(`.v-${mode === 'speed' ? 's' : 'i'}-${p}[data-idx="${i}"]`).value) || 0;
+                sum += v;
+                if(v < 6) allH = false;
+                if(v > 4) allL = false;
+            });
+            results.push({ name: names[i-1], avg: (sum / selected.length).toFixed(1), high: allH, low: allL, id: i });
+        }
+        lastAnalysis = { mode: mode === 'speed' ? '스피드전' : '아이템전', data: results };
+        document.getElementById('result-area').style.display = 'block';
+        renderAnalysis('default');
+    };
+
+    window.renderAnalysis = function(sortType) {
+        let displayData = [...lastAnalysis.data];
+        if(sortType === 'desc') displayData.sort((a, b) => b.avg - a.avg);
+        if(sortType === 'asc') displayData.sort((a, b) => a.avg - b.avg);
+
+        let html = `<h4>[ ${lastAnalysis.mode} ]</h4><table><tr><th>순위</th><th>종목명</th><th>평균점수</th></tr>`;
+        displayData.forEach((d, idx) => {
+            const cls = d.high ? 'high-score' : (d.low ? 'low-score' : '');
+            html += `<tr class="${cls}"><td>${idx+1}</td><td>${d.name}</td><td>${d.avg}</td></tr>`;
+        });
+        document.getElementById('res-content').innerHTML = html + "</table>";
+    };
+
+    init();
+</script>
+</body>
+</html>
