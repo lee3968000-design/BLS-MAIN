@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아이템전 통합 기록실</title>
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; padding: 20px; background-color: #f0f2f5; }
+        h1 { text-align: center; color: #333; }
+        
+        /* 컨트롤 패널 */
+        .controls { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; align-items: center; }
+        select, button, input { padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background-color: #444; color: white; cursor: pointer; transition: 0.2s; }
+        button:hover { background-color: #666; }
+        button.save-btn { background-color: #007bff; border-color: #007bff; }
+        button.save-btn:hover { background-color: #0056b3; }
+        .home-btn { background-color: #333 !important; margin-right: 15px; }
+
+        /* 테이블 스타일 */
+        .table-container { overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: relative; max-height: 80vh; }
+        table { border-collapse: separate; border-spacing: 0; }
+        
+        /* 셀 스타일 */
+        th, td { padding: 8px 5px; text-align: center; border-bottom: 1px solid #eee; white-space: nowrap; border-right: 1px solid #eee; font-size: 0.9rem; }
+        
+        /* 종목 간 구분선 (굵게) */
+        .event-divider { border-right: 2px solid #999; }
+
+        /* 헤더 고정 (2단 구조) */
+        thead { position: sticky; top: 0; z-index: 20; }
+        th { background-color: #444; color: white; user-select: none; }
+        
+        /* 1단 헤더 (종목명) */
+        .header-top th { background-color: #333; border-bottom: 1px solid #666; font-size: 1.1em; padding: 10px; }
+        
+        /* 2단 헤더 (세부항목) */
+        .header-sub th { background-color: #555; font-size: 0.8em; cursor: pointer; }
+        .header-sub th:hover { background-color: #777; }
+
+        /* 이름 컬럼 고정 (Sticky) */
+        .sticky-col { 
+            position: sticky; 
+            left: 0; 
+            z-index: 30; 
+            background-color: #fff; 
+            border-right: 2px solid #333; /* 이름 옆은 더 진하게 */
+            font-weight: bold;
+            min-width: 100px;
+        }
+        /* 헤더의 이름 컬럼도 고정 */
+        .header-top .sticky-col { z-index: 40; background-color: #333; }
+        .header-sub .sticky-col { z-index: 40; background-color: #555; }
+
+        /* 팀 색상 */
+        .team-purple { border-left: 5px solid #800080; background-color: #fcf0fc; color: #800080; }
+        .team-green { border-left: 5px solid #008000; background-color: #f0fcf0; color: #008000; }
+        .team-yellow { border-left: 5px solid #DAA520; background-color: #fcfcf0; color: #DAA520; }
+        .team-blue { border-left: 5px solid #0000FF; background-color: #f0f0fc; color: #0000FF; }
+        .team-red { border-left: 5px solid #FF0000; background-color: #fcf0f0; color: #FF0000; }
+        .team-brown { border-left: 5px solid #A52A2A; background-color: #fcf5f0; color: #A52A2A; }
+
+        /* 관리자 패널 */
+        #adminPanel { display: none; border: 2px solid #444; padding: 20px; margin-top: 20px; background: #fff; border-radius: 8px; }
+        .input-group { margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    </style>
+</head>
+<body>
+
+    <h1>🏰 아이템전 통합 기록실</h1>
+
+    <div class="controls">
+        <button onclick="location.href='index.html'" class="home-btn">🏠 홈으로</button>
+
+        <label>📅 주차:</label>
+        <select id="weekSelect" onchange="loadData()">
+            <option value="item_week1">1주차</option>
+            <option value="item_week2">2주차</option>
+            <option value="item_week3">3주차</option>
+            <option value="item_week4">4주차</option>
+            <option value="item_week5">5주차</option>
+        </select>
+
+        <button onclick="toggleAdmin()">⚙️ 기록 입력 (관리자)</button>
+    </div>
+
+    <div class="table-container">
+        <table id="recordTable">
+            <thead id="tableHead">
+                </thead>
+            <tbody id="tableBody">
+                <tr><td colspan="60" style="text-align:center; padding: 20px;">데이터를 불러오는 중...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="adminPanel">
+        <h3>📝 기록 입력 패널</h3>
+        <div class="input-group">
+            <select id="inputEventSelect">
+                </select>
+            <select id="inputNameSelect">
+                <option value="">선수 선택</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <select id="inputMetricSelect" onchange="updatePlaceholder()">
+                </select>
+            <input type="text" id="inputRecord" placeholder="기록 입력 (엔터로 저장)" onkeydown="if(window.event.keyCode == 13){ saveRecord(); }">
+            <button class="save-btn" onclick="saveRecord()">저장</button>
+        </div>
+        <p style="font-size: 0.8em; color: gray;">
+            * <b>시간(소수점)</b>: 자동 .00 처리 / <b>문제수(정수)</b>: 숫자만 / <b>RETIRE</b>: 자동 대문자 변환<br>
+            * <b>서포터 요정시간</b>: 기록 없을 시 '-' 입력 가능
+        </p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // ✅ [설정 1] 아이템전 종목 12개
+        const eventNames = [
+            "단어조합", "카테고리", "트랜스레터", "인물퀴즈", 
+            "나라퀴즈", "캐치마인드", "유튜브", "하이로우", 
+            "컬러 체인지", "한수완", "룰렛", "이상형"
+        ];
+
+        // ✅ [설정 2] 5개 세부 항목 (요청하신 대로 간소화)
+        const metrics = [
+            { key: "sw_prob", label: "스위퍼<br>문제수", type: "int" },
+            { key: "sp_item", label: "서포터<br>아이템", type: "text" },
+            { key: "sp_fairy", label: "서포터<br>요정시간", type: "float_dash" },
+            { key: "rn_time", label: "러너<br>최종시간", type: "float_retire" },
+            { key: "rn_prob", label: "러너<br>문제수", type: "int" }
+        ];
+
+        // ✅ [설정 3] 참가자 명단
+        const defaultPlayers = [
+            { name: "GMT_과박", team: "purple" }, { name: "GMT_랑월", team: "purple" }, { name: "GMT_익명", team: "purple" }, { name: "GMT_찌농", team: "purple" }, { name: "GMT_후쥐", team: "purple" },
+            { name: "GS3_게로", team: "green" }, { name: "GS3_창조", team: "green" }, { name: "GS3_넴리", team: "green" }, { name: "GS3_직플", team: "green" }, { name: "GS3_서진", team: "green" },
+            { name: "B1A4_운명", team: "yellow" }, { name: "B1A4_러각", team: "yellow" }, { name: "B1A4_소네", team: "yellow" }, { name: "B1A4_우유", team: "yellow" }, { name: "B1A4_집가", team: "yellow" },
+            { name: "DBT_모지", team: "blue" }, { name: "DBT_로니", team: "blue" }, { name: "DBT_사르", team: "blue" }, { name: "DBT_지니", team: "blue" }, { name: "DBT_티티", team: "blue" },
+            { name: "HTML_하멜", team: "red" }, { name: "HTML_귤까", team: "red" }, { name: "HTML_무혼", team: "red" }, { name: "HTML_흑랑", team: "red" }, { name: "HTML_엘제", team: "red" },
+            { name: "BLS_한빈", team: "brown" }, { name: "BLS_도감", team: "brown" }, { name: "BLS_문스", team: "brown" }, { name: "BLS_블스", team: "brown" }, { name: "BLS_섭좀", team: "brown" }
+        ];
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDP7WJoqi9hWXO27KaeY9Lvitj-5-E0j5Y",
+            authDomain: "bsar5-d7818.firebaseapp.com",
+            databaseURL: "https://bsar5-d7818-default-rtdb.firebaseio.com",
+            projectId: "bsar5-d7818",
+            storageBucket: "bsar5-d7818.firebasestorage.app",
+            messagingSenderId: "377629207721",
+            appId: "1:377629207721:web:8b893496c0ac1749890db8",
+            measurementId: "G-M9FJXYTS3F"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let currentData = [];
+        let currentWeek = "item_week1";
+
+        window.loadData = loadData;
+        window.saveRecord = saveRecord;
+        window.toggleAdmin = toggleAdmin;
+        window.sortTable = sortTable;
+        window.updatePlaceholder = updatePlaceholder;
+
+        function initUI() {
+            renderHeader();
+            
+            // 1. 종목 선택 드롭다운 (입력용)
+            const eventSelect = document.getElementById('inputEventSelect');
+            let eventOptions = "";
+            eventNames.forEach((name, index) => {
+                eventOptions += `<option value="event${index + 1}">${name}</option>`;
+            });
+            eventSelect.innerHTML = eventOptions;
+
+            // 2. 항목 선택 드롭다운
+            const metricSelect = document.getElementById('inputMetricSelect');
+            let metricOptions = "";
+            metrics.forEach((m) => {
+                metricOptions += `<option value="${m.key}" data-type="${m.type}">${m.label.replace('<br>',' ')}</option>`;
+            });
+            metricSelect.innerHTML = metricOptions;
+
+            // 3. 선수 선택 드롭다운
+            const nameSelect = document.getElementById('inputNameSelect');
+            let nameOptions = `<option value="">선수 선택</option>`;
+            defaultPlayers.forEach(p => {
+                nameOptions += `<option value="${p.name}">${p.name} (${p.team})</option>`;
+            });
+            nameSelect.innerHTML = nameOptions;
+        }
+
+        function renderHeader() {
+            const thead = document.getElementById('tableHead');
+            
+            // 1단 헤더: 종목명 (colspan=5)
+            let row1 = `<tr class="header-top"><th class="sticky-col" rowspan="2">이름 (팀)</th>`;
+            eventNames.forEach((name, index) => {
+                // 마지막 종목이 아니면 구분선 클래스 추가
+                const borderClass = (index < eventNames.length - 1) ? "event-divider" : "";
+                row1 += `<th colspan="5" class="${borderClass}">${name}</th>`;
+            });
+            row1 += `</tr>`;
+
+            // 2단 헤더: 세부 항목
+            let row2 = `<tr class="header-sub">`;
+            eventNames.forEach((_, evIdx) => {
+                metrics.forEach((m, mIdx) => {
+                    const isLastMetric = (mIdx === metrics.length - 1);
+                    const borderClass = (isLastMetric && evIdx < eventNames.length - 1) ? "event-divider" : "";
+                    // 정렬 키: eventX_metricKey
+                    const sortKey = `event${evIdx+1}_${m.key}`;
+                    row2 += `<th class="${borderClass}" onclick="sortTable('${sortKey}')">${m.label}</th>`;
+                });
+            });
+            row2 += `</tr>`;
+
+            thead.innerHTML = row1 + row2;
+        }
+
+        function updatePlaceholder() {
+            const select = document.getElementById('inputMetricSelect');
+            const type = select.options[select.selectedIndex].dataset.type;
+            const input = document.getElementById('inputRecord');
+            
+            if(type.includes('float')) input.placeholder = "시간 (예: 12.34)";
+            else if(type === 'int') input.placeholder = "정수 숫자만";
+            else input.placeholder = "텍스트";
+        }
+
+        async function loadData() {
+            currentWeek = document.getElementById('weekSelect').value;
+            const tableBody = document.getElementById('tableBody');
+            
+            const dbRef = ref(db);
+            // 해당 주차의 모든 데이터를 가져옴 (event1 ~ event12)
+            get(child(dbRef, currentWeek)).then((snapshot) => {
+                let dbData = snapshot.exists() ? snapshot.val() : {};
+
+                // 데이터 병합 (Flattening)
+                currentData = defaultPlayers.map(player => {
+                    let rowData = { ...player }; // 이름, 팀 정보 복사
+                    
+                    // 각 종목별 데이터를 rowData에 평탄화 (ex: event1_rn_time)
+                    eventNames.forEach((_, index) => {
+                        const eventKey = `event${index + 1}`;
+                        const eventData = dbData[eventKey];
+                        const playerEventData = eventData ? eventData[player.name] : null;
+
+                        metrics.forEach(m => {
+                            const fullKey = `${eventKey}_${m.key}`;
+                            rowData[fullKey] = playerEventData ? (playerEventData[m.key] || "-") : "-";
+                        });
+                    });
+                    return rowData;
+                });
+
+                renderTable(currentData);
+            }).catch((error) => {
+                console.error(error);
+                tableBody.innerHTML = '<tr><td colspan="60" style="text-align:center;">불러오기 실패</td></tr>';
+            });
+        }
+
+        function renderTable(data) {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = "";
+
+            data.forEach(person => {
+                let row = `<tr>`;
+                row += `<td class="sticky-col team-${person.team}">${person.name}</td>`;
+                
+                eventNames.forEach((_, evIdx) => {
+                    metrics.forEach((m, mIdx) => {
+                        const isLastMetric = (mIdx === metrics.length - 1);
+                        const borderClass = (isLastMetric && evIdx < eventNames.length - 1) ? "event-divider" : "";
+                        const fullKey = `event${evIdx + 1}_${m.key}`;
+                        
+                        let val = person[fullKey];
+                        // null이나 undefined 방지
+                        if(val === undefined || val === null) val = "-";
+                        
+                        // 0점 처리 (혹시 0이 안 나올까봐)
+                        if(val === 0) val = "0";
+
+                        row += `<td class="${borderClass}">${val}</td>`;
+                    });
+                });
+                row += `</tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        function sortTable(key) {
+            // key 형식: event1_rn_time
+            // metric 타입 찾기
+            const metricKey = key.split('_').slice(1).join('_'); // rn_time, sw_prob 등
+            const metricInfo = metrics.find(m => m.key === metricKey);
+            const type = metricInfo ? metricInfo.type : 'text';
+
+            currentData.sort((a, b) => {
+                let valA = a[key];
+                let valB = b[key];
+                
+                // 데이터 없는 경우 맨 뒤로
+                if (valA === "-" || valA === undefined) return 1;
+                if (valB === "-" || valB === undefined) return -1;
+                if (valA === "-" && valB === "-") return 0;
+
+                // RETIRE 처리 (가장 큰 값 취급하여 맨 뒤로)
+                if (valA === "RETIRE") return 1;
+                if (valB === "RETIRE") return -1;
+
+                if (type.includes('float') || type === 'int') {
+                    return parseFloat(valA) - parseFloat(valB);
+                } else {
+                    return valA.toString().localeCompare(valB.toString());
+                }
+            });
+            renderTable(currentData);
+        }
+
+        async function saveRecord() {
+            const name = document.getElementById('inputNameSelect').value;
+            const event = document.getElementById('inputEventSelect').value; // event1
+            const metricKey = document.getElementById('inputMetricSelect').value; // rn_time
+            
+            // 선택된 metric의 타입 찾기
+            const metricInfo = metrics.find(m => m.key === metricKey);
+            const type = metricInfo.type;
+
+            let inputElem = document.getElementById('inputRecord');
+            let rawValue = inputElem.value.trim();
+            let finalValue = rawValue;
+
+            if (!name) return alert("선수를 선택하세요.");
+
+            // 데이터 유효성 검사 및 변환
+            if (rawValue === "") {
+                finalValue = null; // 삭제
+            } else {
+                if (type === 'int') {
+                    if (isNaN(rawValue)) return alert("정수만 입력 가능합니다.");
+                    finalValue = parseInt(rawValue);
+                } else if (type === 'float_retire') {
+                    if (rawValue.toUpperCase() === "RETIRE" || rawValue.toUpperCase() === "R") {
+                        finalValue = "RETIRE";
+                    } else if (!isNaN(rawValue)) {
+                        finalValue = parseFloat(rawValue).toFixed(2);
+                    } else {
+                        return alert("숫자 또는 RETIRE(R)만 입력 가능합니다.");
+                    }
+                } else if (type === 'float_dash') {
+                    if (rawValue === "-") {
+                        finalValue = "-";
+                    } else if (!isNaN(rawValue)) {
+                        finalValue = parseFloat(rawValue).toFixed(2);
+                    } else {
+                        return alert("숫자 또는 - 기호만 입력 가능합니다.");
+                    }
+                }
+            }
+
+            // DB 경로: item_week1 / event1 / 이름 / rn_time
+            const playerInfo = defaultPlayers.find(p => p.name === name);
+            const team = playerInfo ? playerInfo.team : "brown";
+
+            const userRef = ref(db, `${currentWeek}/${event}/${name}`);
+
+            get(userRef).then((snapshot) => {
+                let newData = snapshot.exists() ? snapshot.val() : { name: name, team: team };
+                
+                if (finalValue === null) delete newData[metricKey];
+                else newData[metricKey] = finalValue;
+                
+                newData.team = team;
+
+                set(userRef, newData).then(() => {
+                    loadData(); 
+                    inputElem.value = ""; 
+                    inputElem.focus(); 
+                }).catch((error) => {
+                    alert("저장 실패: " + error.message);
+                });
+            });
+        }
+
+        function toggleAdmin() {
+            const panel = document.getElementById('adminPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        initUI();
+        loadData();
+    </script>
+</body>
+</html>
