@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>역쌍근 연습</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        body { font-family: 'Pretendard', 'Malgun Gothic', sans-serif; text-align: center; background: #f4f7f6; padding: 20px; margin: 0; box-sizing: border-box;}
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        
+        h1 { color: #2d3436; margin-bottom: 5px; }
+        .sub-title { color: #636e72; font-size: 14px; margin-bottom: 20px; }
+
+        /* 컨트롤 패널 */
+        .control-panel { background: #dfe6e9; padding: 15px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; align-items: center;}
+        select, input { padding: 8px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; }
+        
+        /* 버튼 스타일 */
+        button { border: none; border-radius: 5px; cursor: pointer; font-weight: bold; padding: 10px 15px; transition: 0.2s; }
+        .home-btn { background: #636e72; color: white; margin-right: 10px;} /* 홈 버튼 */
+        .home-btn:hover { background: #2d3436; }
+        .move-btn { background: #0984e3; color: white; } /* 이동 버튼 */
+        .move-btn:hover { background: #0077c8; }
+
+        /* 정답 단어 */
+        .target-box { margin: 20px 0; }
+        .target-word { font-size: 28px; font-weight: bold; background: #2d3436; color: #2d3436; padding: 5px 20px; border-radius: 8px; cursor: pointer; user-select: none; transition: 0.3s; }
+        .target-word:hover { color: white; background: #2d3436; }
+
+        /* 문제 보드 */
+        .problem-board { margin: 20px 0; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .row-box { display: flex; justify-content: center; align-items: center; gap: 10px; width: 100%; max-width: 400px; background: #fafafa; padding: 10px; border-radius: 8px; border: 1px solid #eee;}
+        .num-badge { color: #b2bec3; font-weight: bold; width: 20px; }
+        .veg-box { width: 80px; padding: 8px 0; font-weight: bold; color: white; border-radius: 6px; font-size: 15px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        
+        /* 채소 색상 */
+        .bg-가지 { background-color: #6c5ce7; }
+        .bg-버섯 { background-color: #a29bfe; }
+        .bg-마늘 { background-color: #636e72; }
+        .bg-바나나 { background-color: #ffeaa7; color: #d35400; }
+        .bg-사과 { background-color: #ff7675; }
+
+        /* 입력창 */
+        .input-section { margin-top: 30px; background: #f1f2f6; padding: 20px; border-radius: 10px; }
+        .answer-input { width: 80%; padding: 15px; font-size: 20px; text-align: center; border: 2px solid #dfe6e9; border-radius: 10px; outline: none; transition: 0.3s; }
+        .answer-input:focus { border-color: #0984e3; background: white; }
+        .msg { margin-top: 15px; font-weight: bold; white-space: pre-line; min-height: 40px; font-size: 15px; line-height: 1.6;}
+
+        /* 리더보드 */
+        .leaderboard { margin-top: 40px; text-align: left; border-top: 2px solid #eee; padding-top: 20px; }
+        .rank-list { max-height: 300px; overflow-y: auto; }
+        .rank-item { padding: 10px; border-bottom: 1px solid #f1f1f1; font-size: 14px; display: flex; justify-content: space-between;}
+        .rank-1 { color: #d63031; font-weight: bold; background: #fff0f0; }
+        .rank-time { color: #aaa; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div style="text-align: left; margin-bottom: 10px;">
+        <button class="home-btn" onclick="location.href='index.html'">🏠 메인으로</button>
+    </div>
+
+    <h1><역쌍근 연습></h1>
+    <div class="sub-title">표준국어대사전 2글자 챌린지</div>
+    
+    <div class="control-panel">
+        <input type="text" id="nickname" placeholder="닉네임" style="width: 100px;">
+        <select id="level-select" onchange="loadProblemList()">
+            <option value="lv1">LEVEL 1 (3줄)</option>
+            <option value="lv2">LEVEL 2 (4줄)</option>
+            <option value="lv3">LEVEL 3 (5줄)</option>
+            <option value="lv4">LEVEL 4 (6줄)</option>
+            <option value="lv5">LEVEL 5 (7줄)</option>
+            <option value="lv6">LEVEL 6 (8줄)</option>
+            <option value="lv7">LEVEL 7 (9줄)</option>
+            <option value="lv8">LEVEL 8 (10줄)</option>
+        </select>
+        <select id="q-select" onchange="loadGame()">
+            </select>
+        <button class="move-btn" onclick="loadGame()">문제 이동</button>
+    </div>
+
+    <div class="target-box">
+        <div>정답 단어 (마우스를 올리면 보임)</div>
+        <span id="target-display" class="target-word">??</span>
+    </div>
+
+    <div id="game-board" class="problem-board">
+        </div>
+
+    <div class="input-section">
+        <input type="text" id="user-answer" class="answer-input" placeholder="정답 입력 (예: 가구 나비 다리)" onkeydown="if(event.key === 'Enter') checkAnswer()">
+        <div id="status-msg" class="msg">게임을 불러오는 중...</div>
+    </div>
+
+    <div class="leaderboard">
+        <h3>🏅 명예의 전당 (실시간)</h3>
+        <div id="rank-list" class="rank-list">불러오는 중...</div>
+    </div>
+</div>
+
+<script>
+    // Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyDP7WJoqi9hWXO27KaeY9Lvitj-5-E0j5Y",
+        authDomain: "bsar5-d7818.firebaseapp.com",
+        databaseURL: "https://bsar5-d7818-default-rtdb.firebaseio.com",
+        projectId: "bsar5-d7818",
+        storageBucket: "bsar5-d7818.firebasestorage.app",
+        messagingSenderId: "377629207721",
+        appId: "1:377629207721:web:8b893496c0ac1749890db8",
+        measurementId: "G-M9FJXYTS3F"
+    };
+    
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let dictionary = new Set();
+    let currentProblem = null;
+    let currentLevel = "lv1";
+    let currentQIdx = 0;
+
+    window.onload = async function() {
+        document.getElementById('status-msg').innerText = "사전 데이터를 다운로드 중입니다...";
+        const snap = await db.ref('dictionary').once('value');
+        if (snap.exists()) {
+            dictionary = new Set(snap.val());
+            document.getElementById('status-msg').innerText = "준비 완료! 닉네임을 쓰고 문제를 선택하세요.";
+        } else {
+            document.getElementById('status-msg').innerText = "⚠️ DB에 데이터가 없습니다.";
+            document.getElementById('status-msg').style.color = "red";
+        }
+        loadProblemList();
+    };
+
+    function loadProblemList() {
+        const sel = document.getElementById('q-select');
+        sel.innerHTML = "";
+        for(let i=1; i<=20; i++) {
+            let opt = document.createElement('option');
+            opt.value = i-1;
+            opt.text = `문제 ${i}`;
+            sel.appendChild(opt);
+        }
+        loadGame();
+    }
+
+    function loadGame() {
+        currentLevel = document.getElementById('level-select').value;
+        currentQIdx = document.getElementById('q-select').value;
+        
+        document.getElementById('user-answer').value = "";
+        document.getElementById('user-answer').disabled = false;
+        document.getElementById('status-msg').innerText = "";
+        document.getElementById('status-msg').style.color = "black";
+        document.getElementById('game-board').innerHTML = "문제를 불러오는 중...";
+
+        db.ref(`problems/${currentLevel}/${currentQIdx}`).once('value').then(snap => {
+            currentProblem = snap.val();
+            if(!currentProblem) {
+                document.getElementById('game-board').innerHTML = "문제를 찾을 수 없습니다.";
+                return;
+            }
+            
+            document.getElementById('target-display').innerText = currentProblem.target;
+            const board = document.getElementById('game-board');
+            board.innerHTML = "";
+            
+            currentProblem.pairs.forEach((pair, idx) => {
+                const row = document.createElement('div');
+                row.className = 'row-box';
+                row.innerHTML = `
+                    <span class="num-badge">${idx+1}</span>
+                    <div class="veg-box bg-${pair.v1}">${pair.v1}</div>
+                    <div class="veg-box bg-${pair.v2}">${pair.v2}</div>
+                `;
+                board.appendChild(row);
+            });
+            loadLeaderboard();
+        });
+    }
+
+    // 자모 분해 및 규칙 체크 (Rule 7 적용)
+    const CHO = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
+    const JUNG = ["ㅏ","ㅐ","ㅑ","ㅒ","ㅓ","ㅔ","ㅕ","ㅖ","ㅗ","ㅘ","ㅙ","ㅚ","ㅛ","ㅜ","ㅝ","ㅞ","ㅟ","ㅠ","ㅡ","ㅢ","ㅣ"];
+    const JONG = ["","ㄱ","ㄲ","ㄳ","ㄴ","ㄵ","ㄶ","ㄷ","ㄹ","ㄺ","ㄻ","ㄼ","ㄽ","ㄾ","ㄿ","ㅀ","ㅁ","ㅂ","ㅄ","ㅅ","ㅆ","ㅇ","ㅈ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
+    const SPLIT = {
+        'ㅘ':['ㅗ','ㅏ'], 'ㅙ':['ㅗ','ㅐ'], 'ㅚ':['ㅗ','ㅣ'], 'ㅝ':['ㅜ','ㅓ'], 'ㅞ':['ㅜ','ㅔ'], 'ㅟ':['ㅜ','ㅣ'], 'ㅢ':['ㅡ','ㅣ'],
+        'ㄳ':['ㄱ','ㅅ'], 'ㄵ':['ㄴ','ㅈ'], 'ㄶ':['ㄴ','ㅎ'], 'ㄺ':['ㄹ','ㄱ'], 'ㄻ':['ㄹ','ㅁ'], 'ㄼ':['ㄹ','ㅂ'], 
+        'ㄽ':['ㄹ','ㅅ'], 'ㄾ':['ㄹ','ㅌ'], 'ㄿ':['ㄹ','ㅍ'], 'ㅀ':['ㄹ','ㅎ'], 'ㅄ':['ㅂ','ㅅ']
+    };
+
+    function getComp(char) {
+        if(!char) return {cho:'', all:new Set()};
+        const c = char.charCodeAt(0) - 44032;
+        if(c<0 || c>11171) return {cho:char, all:new Set([char])};
+
+        const cho = CHO[Math.floor(c/588)];
+        const jung = JUNG[Math.floor((c%588)/28)];
+        const jong = JONG[c%28];
+
+        let set = new Set();
+        set.add(cho);
+        if(SPLIT[jung]) SPLIT[jung].forEach(x=>set.add(x)); else set.add(jung);
+        if(jong !== "") { if(SPLIT[jong]) SPLIT[jong].forEach(x=>set.add(x)); else set.add(jong); }
+        return { cho: cho, all: set };
+    }
+
+    function checkRule(rule, inpC, tgtC, oppC) {
+        const i = getComp(inpC);
+        const t = getComp(tgtC);
+        const o = getComp(oppC);
+        let match = 0;
+        i.all.forEach(x => { if(t.all.has(x)) match++; });
+
+        if(rule === "버섯") return (i.cho === t.cho && match >= 2);
+        if(rule === "마늘") return (i.cho !== t.cho && match >= 2);
+        if(rule === "가지") return (match === 1);
+        if(rule === "사과") return (match === 0);
+        if(rule === "바나나") {
+            let oppMatch = 0;
+            i.all.forEach(x => { if(o.all.has(x)) oppMatch++; });
+            return (match === 0 && oppMatch >= 1);
+        }
+        return false;
+    }
+
+    function checkAnswer() {
+        const nick = document.getElementById('nickname').value.trim();
+        if(!nick) { alert("닉네임을 먼저 입력해주세요!"); return; }
+
+        const inputRaw = document.getElementById('user-answer').value.trim();
+        const inputs = inputRaw.split(/\s+/);
+        const status = document.getElementById('status-msg');
+        
+        if(inputs.length !== currentProblem.pairs.length) {
+            status.innerText = `❌ 단어 개수가 맞지 않습니다.`;
+            status.style.color = "#d63031";
+            return;
+        }
+        if(new Set(inputs).size !== inputs.length) {
+            status.innerText = "❌ 중복된 단어가 있습니다.";
+            status.style.color = "#d63031";
+            return;
+        }
+
+        let logs = "";
+        let pass = true;
+        const target = currentProblem.target;
+
+        for(let i=0; i<inputs.length; i++) {
+            const word = inputs[i];
+            if(!dictionary.has(word)) { logs += `'${word}'는 사전에 없습니다.\n`; pass = false; continue; }
+            const p = currentProblem.pairs[i];
+            const r1 = checkRule(p.v1, word[0], target[0], target[1]);
+            const r2 = checkRule(p.v2, word[1], target[1], target[0]);
+            if(!r1 || !r2) { logs += `'${word}' 오답\n`; pass = false; }
+        }
+
+        if(pass) {
+            status.innerText = "🎉 정답입니다!!";
+            status.style.color = "#0984e3";
+            document.getElementById('user-answer').disabled = true;
+            saveRecord(nick);
+        } else {
+            status.innerText = "❌ 오답입니다:\n" + logs;
+            status.style.color = "#d63031";
+        }
+    }
+
+    function saveRecord(nick) {
+        const path = `leaderboard/${currentLevel}/${currentQIdx}`;
+        db.ref(path).push({ nickname: nick, time: new Date().toLocaleString() });
+    }
+
+    function loadLeaderboard() {
+        const list = document.getElementById('rank-list');
+        list.innerHTML = "로딩 중...";
+        const path = `leaderboard/${currentLevel}/${currentQIdx}`;
+        db.ref(path).limitToLast(30).on('value', snap => {
+            list.innerHTML = "";
+            const data = snap.val();
+            if(!data) { list.innerHTML = "<div style='padding:10px; color:#999;'>아직 정답자가 없습니다.</div>"; return; }
+            const arr = Object.values(data).reverse();
+            arr.forEach((item, idx) => {
+                const div = document.createElement('div');
+                div.className = `rank-item ${idx===0?'rank-1':''}`;
+                div.innerHTML = `<span>${idx+1}위 : <b>${item.nickname}</b></span><span class="rank-time">${item.time}</span>`;
+                list.appendChild(div);
+            });
+        });
+    }
+</script>
+
+</body>
+</html>
