@@ -12,14 +12,10 @@
             padding: 0; 
             width: 100vw; 
             height: 100vh; 
-            overflow: hidden; /* 스크롤 방지 */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            /* 기본 스타일 (DB 로딩 전) */
             background-color: #1e272e;
             color: white;
             font-family: 'Pretendard', sans-serif;
+            overflow: hidden; /* 바디 스크롤 방지 */
         }
 
         /* 홈 버튼 */
@@ -28,7 +24,7 @@
             top: 20px;
             left: 20px;
             background: rgba(255, 255, 255, 0.2);
-            color: inherit; /* 배경에 따라 글자색 따라감 */
+            color: inherit;
             padding: 10px 20px;
             border: 1px solid rgba(255, 255, 255, 0.4);
             border-radius: 30px;
@@ -39,62 +35,93 @@
             backdrop-filter: blur(5px);
         }
 
-        /* 마더보드 (화면 전체) */
+        /* 마더보드 (텍스트 영역) - 핵심 수정 부분 */
         #board-display {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            outline: none; /* 편집 중 테두리 없애기 */
-            word-break: break-word;
-            padding: 20px;
+            padding: 80px 40px 40px 40px; /* 상단 홈버튼 공간 확보 */
             box-sizing: border-box;
+            
+            /* 스크롤 및 정렬 설정 */
+            display: block; /* Flex 제거 -> 스크롤 버그 해결 */
+            overflow-y: auto; /* 내용 넘치면 스크롤 생성 */
+            overflow-x: hidden; /* 가로 스크롤 방지 */
+            
+            white-space: pre-wrap; /* 엔터키 줄바꿈 인식 */
+            word-break: break-word; /* 긴 단어 줄바꿈 */
+            writing-mode: horizontal-tb !important; /* 무조건 가로쓰기 강제 */
+            
+            outline: none;
             
             /* 기본 폰트 설정 */
             font-size: 80px; 
             font-weight: bold;
+            text-align: center; /* 기본 가운데 정렬 */
         }
 
-        /* 관리자용 컨트롤 패널 (평소엔 숨김) */
+        /* 스크롤바 디자인 (크롬/사파리) */
+        #board-display::-webkit-scrollbar {
+            width: 10px;
+        }
+        #board-display::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+        #board-display::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        /* 관리자 패널 */
         #admin-panel {
-            display: none; /* 기본 숨김 */
+            display: none;
             position: absolute;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             padding: 15px 25px;
             border-radius: 50px;
-            gap: 15px;
+            gap: 20px;
             align-items: center;
             z-index: 200;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            white-space: nowrap;
         }
 
         .control-group {
             display: flex;
             flex-direction: column;
             align-items: center;
-            color: white;
-            font-size: 12px;
+            color: #ddd;
+            font-size: 11px;
         }
         
-        input[type="color"] {
-            border: none;
-            width: 30px;
-            height: 30px;
-            cursor: pointer;
-            background: none;
+        .align-group {
+            display: flex;
+            gap: 5px;
+            background: rgba(255,255,255,0.1);
+            padding: 5px;
+            border-radius: 10px;
         }
 
-        input[type="range"] {
-            width: 100px;
+        .align-btn {
+            background: transparent;
+            border: 1px solid #555;
+            color: white;
             cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
         }
+        .align-btn:hover { background: rgba(255,255,255,0.2); }
+        .align-btn.active { background: #0984e3; border-color: #0984e3; }
+        
+        input[type="color"] { border: none; width: 30px; height: 30px; cursor: pointer; background: none; }
+        input[type="range"] { width: 80px; cursor: pointer; }
 
-        /* 저장 버튼 */
         .save-btn {
             background: #00b894;
             color: white;
@@ -103,11 +130,9 @@
             border-radius: 20px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 14px;
         }
         .save-btn:hover { background: #00a383; }
 
-        /* 설정 진입 버튼 (톱니바퀴) */
         .gear-btn {
             position: absolute;
             bottom: 20px;
@@ -122,16 +147,14 @@
         }
         .gear-btn:hover { opacity: 1; }
 
-        /* 편집 모드일 때 테두리 표시 */
         .editing {
-            border: 2px dashed rgba(255,255,255,0.5);
-            background-color: rgba(0,0,0,0.1);
+            border: 4px solid rgba(0, 184, 148, 0.5); /* 편집 중 테두리 강조 */
+            background-color: rgba(0,0,0,0.2);
         }
         
-        /* 이미지 크기 자동 조절 */
         #board-display img {
-            max-width: 90%;
-            max-height: 90vh;
+            max-width: 100%;
+            height: auto;
             border-radius: 10px;
         }
     </style>
@@ -148,6 +171,15 @@
 
     <div id="admin-panel">
         <div class="control-group">
+            <span style="margin-bottom:5px;">정렬</span>
+            <div class="align-group">
+                <button class="align-btn" onclick="setAlignment('left')">L</button>
+                <button class="align-btn" onclick="setAlignment('center')">C</button>
+                <button class="align-btn" onclick="setAlignment('right')">R</button>
+            </div>
+        </div>
+
+        <div class="control-group">
             <span>배경색</span>
             <input type="color" id="bg-picker" value="#1e272e" oninput="previewStyle()">
         </div>
@@ -156,10 +188,10 @@
             <input type="color" id="text-picker" value="#ffffff" oninput="previewStyle()">
         </div>
         <div class="control-group">
-            <span>글자 크기</span>
-            <input type="range" id="size-slider" min="20" max="200" value="80" oninput="previewStyle()">
+            <span>크기</span>
+            <input type="range" id="size-slider" min="20" max="250" value="80" oninput="previewStyle()">
         </div>
-        <button class="save-btn" onclick="saveToDB()">💾 저장 & 게시</button>
+        <button class="save-btn" onclick="saveToDB()">💾 저장</button>
     </div>
 
 <script>
@@ -178,7 +210,6 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // DOM 요소
     const board = document.getElementById('board-display');
     const panel = document.getElementById('admin-panel');
     const bgPicker = document.getElementById('bg-picker');
@@ -186,11 +217,11 @@
     const sizeSlider = document.getElementById('size-slider');
 
     let isAdmin = false;
+    let currentAlign = 'center'; // 기본 정렬값
 
-    // 1. 데이터 불러오기 (Read)
+    // 1. 데이터 불러오기
     db.ref('board_settings').on('value', snap => {
-        // 관리자가 편집 중일 때는 외부 데이터로 덮어쓰지 않음 (충돌 방지)
-        if (isAdmin) return;
+        if (isAdmin) return; // 편집 중엔 업데이트 무시
 
         const data = snap.val();
         if (data) {
@@ -200,77 +231,100 @@
         }
     });
 
-    // 화면에 스타일 적용하는 함수
     function applyStyle(data) {
         document.body.style.backgroundColor = data.bgColor;
         board.style.color = data.textColor;
         board.style.fontSize = data.fontSize + "px";
-        board.innerHTML = data.content; // HTML 태그(이미지 등) 포함
+        board.style.textAlign = data.textAlign || 'center'; // 정렬 적용
+        board.innerHTML = data.content;
 
-        // 컨트롤 패널 값도 동기화 (나중에 열었을 때를 대비)
+        // 패널 값 동기화
         bgPicker.value = data.bgColor;
         textPicker.value = data.textColor;
         sizeSlider.value = data.fontSize;
+        currentAlign = data.textAlign || 'center';
         
-        // 버튼 색상들도 배경에 맞춰 가독성 조정
+        // 버튼 색상 자동 조정
         document.querySelector('.home-btn').style.color = data.textColor;
         document.querySelector('.gear-btn').style.color = data.textColor;
     }
 
-    // 2. 관리자 모드 진입
+    // 2. 관리자 모드
     function openAdminMode() {
-        if (isAdmin) { // 이미 열려있으면 닫기
-            isAdmin = false;
-            panel.style.display = 'none';
-            board.contentEditable = "false";
-            board.classList.remove('editing');
-            // 원래 데이터로 복구 (저장 안 했으면 취소)
-            db.ref('board_settings').once('value', snap => {
-                if(snap.val()) applyStyle(snap.val());
-            });
+        if (isAdmin) {
+            closeAdminMode();
             return;
         }
-
         const password = prompt("관리자 암호(3968)를 입력하세요:");
         if (password === "3968") {
             isAdmin = true;
-            panel.style.display = 'flex'; // 패널 보이기
-            board.contentEditable = "true"; // 화면 직접 수정 가능하게 변경
-            board.classList.add('editing'); // 편집 중임을 알리는 테두리
-            board.focus(); // 바로 입력 가능하게 포커스
-            alert("이제 화면을 클릭해서 글을 쓰고, 아래 패널에서 색상을 바꾸세요!");
+            panel.style.display = 'flex';
+            board.contentEditable = "true";
+            board.classList.add('editing');
+            board.focus();
+            
+            // 현재 정렬 버튼 활성화 표시
+            updateAlignButtons();
         } else {
             if(password !== null) alert("암호가 틀렸습니다.");
         }
     }
 
-    // 3. 미리보기 (저장 전 로컬 변경)
+    function closeAdminMode() {
+        isAdmin = false;
+        panel.style.display = 'none';
+        board.contentEditable = "false";
+        board.classList.remove('editing');
+        // 저장 안 하고 닫으면 DB 값으로 복구
+        db.ref('board_settings').once('value', snap => {
+            if(snap.val()) applyStyle(snap.val());
+        });
+    }
+
+    // 3. 스타일 미리보기
     function previewStyle() {
         document.body.style.backgroundColor = bgPicker.value;
         board.style.color = textPicker.value;
         board.style.fontSize = sizeSlider.value + "px";
     }
 
-    // 4. 데이터 저장 (Write)
+    // 4. 정렬 기능
+    function setAlignment(align) {
+        currentAlign = align;
+        board.style.textAlign = align;
+        updateAlignButtons();
+    }
+
+    function updateAlignButtons() {
+        document.querySelectorAll('.align-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        // L, C, R 버튼 중 현재 상태에 맞는 것에 색칠
+        if(currentAlign === 'left') document.querySelectorAll('.align-btn')[0].classList.add('active');
+        if(currentAlign === 'center') document.querySelectorAll('.align-btn')[1].classList.add('active');
+        if(currentAlign === 'right') document.querySelectorAll('.align-btn')[2].classList.add('active');
+    }
+
+    // 5. 저장
     function saveToDB() {
         const data = {
-            content: board.innerHTML, // 이미지 태그 포함해서 저장됨
+            content: board.innerHTML,
             bgColor: bgPicker.value,
             textColor: textPicker.value,
             fontSize: sizeSlider.value,
+            textAlign: currentAlign, // 정렬 값도 저장
             timestamp: firebase.database.ServerValue.TIMESTAMP
         };
 
         db.ref('board_settings').set(data)
             .then(() => {
-                alert("✅ 전광판이 업데이트되었습니다!");
-                // 편집 모드 종료
+                alert("✅ 저장 완료!");
                 isAdmin = false;
                 panel.style.display = 'none';
                 board.contentEditable = "false";
                 board.classList.remove('editing');
             })
-            .catch(err => alert("오류 발생: " + err));
+            .catch(err => alert("오류: " + err));
     }
 </script>
 
