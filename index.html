@@ -20,7 +20,15 @@
         .c-high { border-top: 5px solid #ffc107; }
         .c-ref { border-top: 5px solid #6f42c1; }
         .c-word { border-top: 5px solid #17a2b8; }
-        .c-zodiac { border-top: 5px solid #d35400; } /* 13간지용 주황색 */
+        .c-zodiac { border-top: 5px solid #d35400; }
+        
+        /* 마더보드 전용 스타일 (어두운 배경) */
+        .c-board { 
+            background-color: #2d3436; /* 어두운 회색 */
+            border-top: 5px solid #dfe6e9; /* 밝은 회색 포인트 */
+        }
+        /* 마더보드 카드는 글씨가 흰색이어야 잘 보임 */
+        .c-board .title, .c-board .icon { color: white; }
     </style>
 </head>
 <body>
@@ -61,6 +69,11 @@
         <a href="zodiac.html" class="card c-zodiac">
             <div class="icon">🐲</div>
             <div class="title">13간지 토너먼트</div>
+        </a>
+
+        <a href="board.html" class="card c-board">
+            <div class="icon">📢</div>
+            <div class="title">실시간 공지판</div>
         </a>
     </div>
 
