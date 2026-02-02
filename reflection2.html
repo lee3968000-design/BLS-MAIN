@@ -55,11 +55,11 @@
         .arrow-left::after { content: '⬅️'; }
         .arrow-right::after { content: '➡️'; }
 
-        /* [개선] 거울 스타일: 선명한 원색(#FF0000, #0033FF) + 굵기 8px */
+        /* [수정됨] 거울 스타일: 아주 선명하고 굵게 */
         .mirror-svg { position: absolute; top:0; left:0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
-        .mirror-line { stroke-width: 8; stroke-linecap: round; } 
-        .red-mirror { stroke: #FF0000; filter: drop-shadow(0 0 1px rgba(0,0,0,0.5)); } 
-        .blue-mirror { stroke: #0033FF; filter: drop-shadow(0 0 1px rgba(0,0,0,0.5)); } 
+        .mirror-line { stroke-width: 10; stroke-linecap: round; } /* 굵기 8 -> 10 */
+        .red-mirror { stroke: #FF0000; filter: drop-shadow(0 0 2px rgba(0,0,0,0.5)); } /* 완전한 빨강 */
+        .blue-mirror { stroke: #0000FF; filter: drop-shadow(0 0 2px rgba(0,0,0,0.5)); } /* 완전한 파랑 */
 
         #sim-layer { position: absolute; top: 10px; left: 10px; pointer-events: none; width: calc(11 * 40px); height: calc(11 * 40px); z-index: 50; }
         .beam { stroke: #f1c40f; stroke-width: 4; stroke-linecap: round; opacity: 0.9; fill: none; filter: drop-shadow(0 0 2px orange); }
@@ -482,7 +482,7 @@
         });
     }
 
-    // [중요] 문제 현황 조회: 5개 지정된 키워드만 조회 및 실시간 감시(.on)
+    // [수정된 로직] 문제 현황 조회: 데이터를 통째로 가져와서(val) 키값으로 직접 확인
     function checkRemaining() {
         document.getElementById('popup-remaining').style.display = 'flex'; 
         const list = document.getElementById('remaining-list'); 
@@ -490,15 +490,17 @@
         
         const targets = ['4x4', '5x5', '6x6', '7x7', '8x8'];
 
+        // 'on'으로 감시하되, val()을 사용해 Raw Object를 가져옴
         db.ref('problems').on('value', snap => {
-            let html = ""; 
+            const data = snap.val(); // 전체 데이터를 객체로 가져옴
+            let html = "";
+            
             targets.forEach(diff => {
-                if (snap.hasChild(diff)) {
-                    const d = snap.child(diff);
-                    const nums = []; 
-                    d.forEach(p => nums.push(parseInt(p.key))); 
-                    nums.sort((a,b)=>a-b); 
-                    html += `<div style="margin-bottom:10px;"><b>[${diff}]</b> 총 ${nums.length}문제<br><span style="color:#555; font-size:0.9em;">(No. ${nums.join(', ')})</span></div>`; 
+                if (data && data[diff]) {
+                    // 해당 난이도 키가 존재하면, 그 안의 키들(문제번호)을 배열로 추출
+                    const keys = Object.keys(data[diff]);
+                    const nums = keys.map(k => parseInt(k)).sort((a,b)=>a-b);
+                    html += `<div style="margin-bottom:10px;"><b>[${diff}]</b> 총 ${nums.length}문제<br><span style="color:#555; font-size:0.9em;">(No. ${nums.join(', ')})</span></div>`;
                 } else {
                     html += `<div style="margin-bottom:10px; opacity:0.5;"><b>[${diff}]</b> 문제 없음</div>`;
                 }
@@ -509,7 +511,6 @@
 
     function closePopup(id) { 
         document.getElementById(id).style.display = 'none'; 
-        // 팝업 닫을 때 리스너 해제
         if(id === 'popup-remaining') db.ref('problems').off();
     }
 </script>
