@@ -55,10 +55,11 @@
         .arrow-left::after { content: '⬅️'; }
         .arrow-right::after { content: '➡️'; }
 
+        /* [개선] 거울 스타일: 선명한 원색(#FF0000, #0033FF) + 굵기 8px */
         .mirror-svg { position: absolute; top:0; left:0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
-        .mirror-line { stroke-width: 5; stroke-linecap: square; }
-        .red-mirror { stroke: #c0392b; }
-        .blue-mirror { stroke: #2980b9; }
+        .mirror-line { stroke-width: 8; stroke-linecap: round; } 
+        .red-mirror { stroke: #FF0000; filter: drop-shadow(0 0 1px rgba(0,0,0,0.5)); } 
+        .blue-mirror { stroke: #0033FF; filter: drop-shadow(0 0 1px rgba(0,0,0,0.5)); } 
 
         #sim-layer { position: absolute; top: 10px; left: 10px; pointer-events: none; width: calc(11 * 40px); height: calc(11 * 40px); z-index: 50; }
         .beam { stroke: #f1c40f; stroke-width: 4; stroke-linecap: round; opacity: 0.9; fill: none; filter: drop-shadow(0 0 2px orange); }
@@ -71,7 +72,6 @@
         .close-btn { position: absolute; top: 10px; right: 10px; background: transparent; color: #333; font-size: 24px; padding: 0; border: none; cursor: pointer; }
         .list-box { max-height: 400px; overflow-y: auto; text-align: left; margin-top: 10px; padding: 10px; background: #f9f9f9; border-radius: 5px; }
 
-        /* 저장 팝업 전용 스타일 */
         .diff-container { display: flex; justify-content: center; gap: 5px; margin: 15px 0; }
         
         .nav-header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; color: white; max-width: 800px; }
@@ -97,7 +97,6 @@
             <h2>문제 제작소 (11x11)</h2>
             <button class="secondary" onclick="goHome()">메뉴로</button>
         </div>
-
         <div class="creator-layout">
             <div class="board-container">
                 <table id="creator-grid" class="grid-table"></table>
@@ -122,6 +121,10 @@
                     <div class="legend-item"><span class="key-badge">Q</span> <span>문제 저장하기</span></div>
                     <div class="legend-item"><span class="key-badge">E</span> <span>경로 미리보기</span></div>
                     <div class="legend-item"><span class="key-badge">R</span> <span>모두 지우기</span></div>
+                </div>
+                <div style="font-size:0.8em; color:#ccc; margin-top:10px;">
+                    * 숫자를 연달아 입력해 두 자릿수 가능<br>
+                    * 엔터키로 입력 확정
                 </div>
             </div>
         </div>
@@ -183,7 +186,6 @@
             <button class="close-btn" onclick="closePopup('popup-save')">✖</button>
             <h3 style="color:#333; margin-bottom:5px;">💾 문제 저장</h3>
             <p style="color:#666; font-size:0.9em; margin-bottom:15px;">난이도를 선택하세요</p>
-            
             <div class="diff-container">
                 <button class="diff-btn" onclick="selectSaveDiff('4x4')">4x4</button>
                 <button class="diff-btn" onclick="selectSaveDiff('5x5')">5x5</button>
@@ -191,7 +193,6 @@
                 <button class="diff-btn" onclick="selectSaveDiff('7x7')">7x7</button>
                 <button class="diff-btn" onclick="selectSaveDiff('8x8')">8x8</button>
             </div>
-
             <input type="number" id="save-prob-num" placeholder="문제 번호 (예: 1)" style="width:80%; margin-top:10px;">
             <br>
             <button onclick="commitSave()" style="margin-top:15px; width:100%; background:#0984e3;">저장하기</button>
@@ -218,8 +219,6 @@
     let creatorGridData = [], selectedCells = new Set(), isDragging = false;
     let keyInputBuffer = ""; 
     let currentProblem = null, currentDiff = "", currentNum = 0, startTime = 0;
-    
-    // 저장용 변수
     let saveSelectedDiff = "";
 
     function showScreen(id) { document.querySelectorAll('.screen').forEach(el => el.classList.remove('active')); document.getElementById(id).classList.add('active'); }
@@ -282,26 +281,18 @@
     document.addEventListener('keydown', (e) => {
         if(!document.getElementById('screen-creator').classList.contains('active')) return;
         if(e.target.tagName === 'INPUT') return;
-        
         const key = e.key;
-
-        if(!isNaN(key) && key !== ' ') {
-            keyInputBuffer += key; applyAction(c => c.text = keyInputBuffer); renderCreatorView(); return;
-        }
-        if(key === 'Enter') {
-            keyInputBuffer = ""; renderCreatorView(); return;
-        }
+        if(!isNaN(key) && key !== ' ') { keyInputBuffer += key; applyAction(c => c.text = keyInputBuffer); renderCreatorView(); return; }
+        if(key === 'Enter') { keyInputBuffer = ""; renderCreatorView(); return; }
         if(key === 'Backspace') {
             if(keyInputBuffer.length > 0) { keyInputBuffer = keyInputBuffer.slice(0, -1); applyAction(c => c.text = keyInputBuffer); }
             else { applyAction(c => { c.text = ""; c.type = EMPTY; c.arrow = null; }); }
             renderCreatorView(); return;
         }
-
         const keyLower = key.toLowerCase();
         if(['q','w','e','r','t','a','s','d','f','arrowup','arrowdown','arrowleft','arrowright','delete'].includes(keyLower)) { keyInputBuffer = ""; }
-
         switch(keyLower) {
-            case 'q': openSavePopup(); break; // [CHANGED] Q 누르면 팝업 열기
+            case 'q': openSavePopup(); break;
             case 'w': applyAction(c => c.type = (c.type===WALL ? EMPTY : WALL)); break;
             case 'e': simulateLightCreator(); break;
             case 'r': if(confirm("초기화?")) initCreatorGrid(); break;
@@ -322,15 +313,10 @@
 
     function applyAction(fn) { selectedCells.forEach(key => { const [r, c] = key.split(',').map(Number); fn(creatorGridData[r][c]); }); }
 
-    // [NEW] 자동 채우기 기능
     function autoFillCells() {
         if(selectedCells.size === 0) return alert("채울 칸들을 선택해주세요!");
-        
-        // 5가지 경우 (빈칸, 거울4종) 각 20%
         applyAction(c => {
-            // 벽이나 화살표가 있는 곳은 건드리지 않음 (안전장치)
             if(c.type === WALL || c.arrow) return;
-
             const rand = Math.random();
             if(rand < 0.2) c.type = EMPTY;
             else if(rand < 0.4) c.type = MIRROR_RED_SLASH;
@@ -341,49 +327,28 @@
         renderCreatorView();
     }
 
-    // [NEW] 저장 팝업 열기
     function openSavePopup() {
         saveSelectedDiff = "";
         document.getElementById('save-prob-num').value = "";
         document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected'));
         document.getElementById('popup-save').style.display = 'flex';
     }
-
-    // [NEW] 난이도 버튼 선택
     function selectSaveDiff(diff) {
         saveSelectedDiff = diff;
         document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected'));
-        // 버튼 텍스트가 diff인 요소 찾아서 활성화
         const btns = document.querySelectorAll('.diff-btn');
-        for(let btn of btns) {
-            if(btn.innerText === diff) btn.classList.add('selected');
-        }
+        for(let btn of btns) if(btn.innerText === diff) btn.classList.add('selected');
     }
-
-    // [NEW] 실제 저장 실행
     function commitSave() {
         if(!saveSelectedDiff) return alert("난이도 버튼을 눌러주세요!");
         const num = document.getElementById('save-prob-num').value;
         if(!num || isNaN(num)) return alert("문제 번호를 입력하세요.");
-
-        // 정답 계산
         const calculatedSolution = calculateSolution(creatorGridData);
-        if(calculatedSolution.length === 0 && !confirm("정답(빛 도착지점의 숫자)이 없습니다.\n그대로 저장할까요?")) return;
-
+        if(calculatedSolution.length === 0 && !confirm("정답이 없습니다. 저장할까요?")) return;
         const path = `problems/${saveSelectedDiff}/${parseInt(num)}`;
         db.ref(path).once('value', snapshot => {
-            if(snapshot.exists()) {
-                alert("이미 존재하는 번호입니다. 다른 번호를 써주세요.");
-            } else {
-                db.ref(path).set({
-                    grid: creatorGridData,
-                    solution: calculatedSolution,
-                    timestamp: firebase.database.ServerValue.TIMESTAMP
-                }).then(() => {
-                    alert(`✅ [${saveSelectedDiff}] ${num}번 문제 저장 완료!`);
-                    closePopup('popup-save');
-                });
-            }
+            if(snapshot.exists()) alert("이미 존재하는 번호입니다.");
+            else db.ref(path).set({ grid: creatorGridData, solution: calculatedSolution, timestamp: firebase.database.ServerValue.TIMESTAMP }).then(() => { alert(`✅ 저장 완료!`); closePopup('popup-save'); });
         });
     }
 
@@ -414,11 +379,7 @@
             lights.push({r, c, dr, dc});
         }
         
-        if(lights.length === 0) {
-            alert("⚠️ 빛이 나올 화살표가 없습니다!\n방향키(↑↓←→)를 눌러 화살표를 배치해주세요.");
-            return;
-        }
-
+        if(lights.length === 0) { alert("⚠️ 빛이 나올 화살표가 없습니다!"); return; }
         let queue = lights.map(l => ({...l, step:0})), visited = new Set();
         while(queue.length > 0) {
             let curr = queue.shift(); let nr = curr.r + curr.dr, nc = curr.c + curr.dc;
@@ -520,15 +481,37 @@
             });
         });
     }
+
+    // [중요] 문제 현황 조회: 5개 지정된 키워드만 조회 및 실시간 감시(.on)
     function checkRemaining() {
-        document.getElementById('popup-remaining').style.display = 'flex'; const list = document.getElementById('remaining-list'); list.innerHTML = "조회 중...";
-        db.ref('problems').once('value').then(snap => {
-            if(!snap.exists()) { list.innerHTML = "문제 없음"; return; }
-            let html = ""; snap.forEach(d => { const nums = []; d.forEach(p => nums.push(parseInt(p.key))); nums.sort((a,b)=>a-b); html += `<div style="margin-bottom:10px;"><b>[${d.key}]</b> 총 ${nums.length}문제<br><span style="color:#555; font-size:0.9em;">(No. ${nums.join(', ')})</span></div>`; });
+        document.getElementById('popup-remaining').style.display = 'flex'; 
+        const list = document.getElementById('remaining-list'); 
+        list.innerHTML = "조회 중...";
+        
+        const targets = ['4x4', '5x5', '6x6', '7x7', '8x8'];
+
+        db.ref('problems').on('value', snap => {
+            let html = ""; 
+            targets.forEach(diff => {
+                if (snap.hasChild(diff)) {
+                    const d = snap.child(diff);
+                    const nums = []; 
+                    d.forEach(p => nums.push(parseInt(p.key))); 
+                    nums.sort((a,b)=>a-b); 
+                    html += `<div style="margin-bottom:10px;"><b>[${diff}]</b> 총 ${nums.length}문제<br><span style="color:#555; font-size:0.9em;">(No. ${nums.join(', ')})</span></div>`; 
+                } else {
+                    html += `<div style="margin-bottom:10px; opacity:0.5;"><b>[${diff}]</b> 문제 없음</div>`;
+                }
+            });
             list.innerHTML = html;
         });
     }
-    function closePopup(id) { document.getElementById(id).style.display = 'none'; }
+
+    function closePopup(id) { 
+        document.getElementById(id).style.display = 'none'; 
+        // 팝업 닫을 때 리스너 해제
+        if(id === 'popup-remaining') db.ref('problems').off();
+    }
 </script>
 </body>
 </html>
