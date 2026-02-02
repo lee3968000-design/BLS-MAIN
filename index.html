@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>부케스파컵5 부롤스타즈</title>
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #e9ecef; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        h1 { color: #333; margin-bottom: 40px; font-size: 2.2rem; text-align: center; font-weight: 800; }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; width: 100%; max-width: 1000px; }
+        .card { background: white; border-radius: 15px; padding: 30px; text-align: center; text-decoration: none; color: #333; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 180px; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px rgba(0,0,0,0.2); }
+        .icon { font-size: 3rem; margin-bottom: 15px; }
+        .title { font-size: 1.2rem; font-weight: bold; }
+        
+        /* 카드별 색상 포인트 */
+        .c-speed { border-top: 5px solid #007bff; }
+        .c-item { border-top: 5px solid #dc3545; }
+        .c-pref { border-top: 5px solid #28a745; }
+        .c-high { border-top: 5px solid #ffc107; }
+        .c-ref { border-top: 5px solid #6f42c1; }
+        .c-word { border-top: 5px solid #17a2b8; }
+        .c-zodiac { border-top: 5px solid #d35400; }
+        .c-diff { border-top: 5px solid #6c5ce7; }
+        .c-board { background-color: #2d3436; border-top: 5px solid #dfe6e9; }
+        .c-board .title, .c-board .icon { color: white; }
+
+        /* [NEW] 반사게임 리뉴얼 전용 스타일 (핑크색) */
+        .c-ref2 { border-top: 5px solid #e84393; } 
+    </style>
+</head>
+<body>
+
+    <h1>🏆 부케스파컵5 부롤스타즈</h1>
+
+    <div class="grid-container">
+        <a href="speed.html" class="card c-speed">
+            <div class="icon">🏎️</div>
+            <div class="title">스피드전 기록실</div>
+        </a>
+
+        <a href="item.html" class="card c-item">
+            <div class="icon">🏰</div>
+            <div class="title">아이템전 기록실</div>
+        </a>
+
+        <a href="preference.html" class="card c-pref">
+            <div class="icon">📊</div>
+            <div class="title">종목별 선호도</div>
+        </a>
+
+        <a href="highlow.html" class="card c-high">
+            <div class="icon">♠️</div>
+            <div class="title">하이로우 연습</div>
+        </a>
+
+        <a href="reflection.html" class="card c-ref">
+            <div class="icon">🔦</div>
+            <div class="title">반사게임 연습</div>
+        </a>
+
+        <a href="reflection2.html" class="card c-ref2">
+            <div class="icon">✨</div>
+            <div class="title">반사게임 리뉴얼</div>
+        </a>
+
+        <a href="game.html" class="card c-word">
+            <div class="icon">🔤</div>
+            <div class="title">역쌍근 연습</div>
+        </a>
+
+        <a href="zodiac.html" class="card c-zodiac">
+            <div class="icon">🐲</div>
+            <div class="title">13간지 토너먼트</div>
+        </a>
+
+        <a href="diff_game.html" class="card c-diff">
+            <div class="icon">🎨</div>
+            <div class="title">컬러체인지 연습</div>
+        </a>
+
+        <a href="board.html" class="card c-board">
+            <div class="icon">📢</div>
+            <div class="title">나라퀴즈 메모</div>
+        </a>
+    </div>
+
+</body>
+</html>
