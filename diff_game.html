@@ -112,9 +112,7 @@
 </div>
 
 <script>
-    // ==========================================
-    // [설정] 사용자 정보 적용 완료
-    // ==========================================
+    // Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyDP7WJoqi9hWXO27KaeY9Lvitj-5-E0j5Y",
         authDomain: "bsar5-d7818.firebaseapp.com",
@@ -129,10 +127,15 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 색상 매핑
+    // 색상 매핑 (수정됨: 초록색을 더 진하게)
     const COLOR_MAP = {
-        "빨강": "#ff7675", "노랑": "#ffeaa7", "파랑": "#0984e3", 
-        "초록": "#55efc4", "회색": "#b2bec3", "검정": "#2d3436", "갈색": "#a0522d"
+        "빨강": "#ff7675", 
+        "노랑": "#ffeaa7", 
+        "파랑": "#0984e3", 
+        "초록": "#00b894", /* <-- 여기가 변경되었습니다 */
+        "회색": "#b2bec3", 
+        "검정": "#2d3436", 
+        "갈색": "#a0522d"
     };
 
     let allData = {}; 
@@ -152,19 +155,15 @@
         const msg = document.getElementById('feedback-msg');
         msg.innerText = "데이터 로딩 중...";
         
-        // 업로더로 올린 diff_problems 경로에서 가져옴
         db.ref('diff_problems').once('value').then(snap => {
             allData = snap.val();
             if(!allData) {
-                msg.innerText = "⚠️ DB에 문제가 없습니다. (diff_uploader.html 실행 필요)";
+                msg.innerText = "⚠️ DB에 문제가 없습니다. (데이터를 다시 업로드해주세요)";
                 msg.style.color = "red";
                 return;
             }
-            // 문제 선택박스 초기화
             updateProblemSelect();
             msg.innerText = "준비 완료! 이동 버튼을 누르세요.";
-            
-            // 자동 시작
             startGame(); 
         });
     }
@@ -194,30 +193,25 @@
         
         if(!allData[currentLevel]) return;
 
-        // 선택값 적용
         currentLevel = lvSelect.value;
         currentIdx = parseInt(probSelect.value);
         currentProblem = allData[currentLevel][currentIdx];
 
-        // UI 초기화
         const input = document.getElementById('user-answer');
         input.value = "";
         input.disabled = false;
         input.focus();
         document.getElementById('feedback-msg').innerText = "";
 
-        // 그리드 그리기
         drawGrid('grid1', currentProblem.board1, currentProblem.rows, currentProblem.cols);
         drawGrid('grid2', currentProblem.board2, currentProblem.rows, currentProblem.cols);
 
-        // 타이머 시작
         if(timerInterval) clearInterval(timerInterval);
         startTime = Date.now();
         timerInterval = setInterval(() => {
             document.getElementById('timer-display').innerText = ((Date.now() - startTime) / 1000).toFixed(2) + "초";
         }, 30);
 
-        // 리더보드 로드
         loadLeaderboard();
     }
 
@@ -225,7 +219,6 @@
         const grid = document.getElementById(elementId);
         grid.innerHTML = "";
         
-        // CSS Grid 템플릿 설정
         grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
         grid.style.width = `${cols * 50 + (cols-1)*2}px`; 
 
@@ -234,6 +227,7 @@
                 const cell = document.createElement('div');
                 cell.className = 'cell';
                 const colorName = boardData[r][c];
+                // 여기서 COLOR_MAP을 사용하여 색상을 적용합니다.
                 cell.style.backgroundColor = COLOR_MAP[colorName] || colorName;
                 grid.appendChild(cell);
             }
@@ -263,7 +257,6 @@
         if (isNaN(val) || val < 0) return;
 
         if (val === currentProblem.answer) {
-            // 정답
             clearInterval(timerInterval);
             const clearTime = ((Date.now() - startTime) / 1000).toFixed(2);
             feedback.style.color = "#00b894";
@@ -271,7 +264,6 @@
             input.disabled = true;
             saveRecord(clearTime);
         } else {
-            // 오답
             feedback.style.color = "#d63031";
             feedback.innerText = `❌ 오답입니다. 다시 세어보세요!`;
             input.value = "";
