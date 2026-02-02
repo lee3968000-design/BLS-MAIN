@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>실시간 마더보드</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        /* 전광판 느낌의 디자인 */
+        body { 
+            font-family: 'Pretendard', sans-serif; 
+            background-color: #1e272e; /* 어두운 배경 */
+            color: #ffffff;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 20px; 
+            box-sizing: border-box; 
+            overflow: hidden; /* 스크롤 방지 (필요시 제거) */
+        }
+
+        .home-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 10px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 30px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+        .home-btn:hover { background: rgba(255, 255, 255, 0.3); }
+
+        /* 마더보드 (텍스트 표시 영역) */
+        .motherboard {
+            width: 100%;
+            max-width: 1200px;
+            height: 70vh; /* 화면 높이의 70% */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 5rem; /* 아주 큰 글씨 */
+            font-weight: bold;
+            line-height: 1.3;
+            word-break: keep-all; /* 단어 단위 줄바꿈 */
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5); /* 네온 효과 */
+        }
+
+        /* 모바일에서는 글씨 크기 자동 조절 */
+        @media (max-width: 768px) {
+            .motherboard { font-size: 3rem; }
+        }
+
+        /* 수정 버튼 (오른쪽 아래 숨김) */
+        .edit-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: transparent;
+            color: #555;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+        }
+        .edit-btn:hover { color: white; }
+
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="home-btn">🏠 메인으로</a>
+
+    <div id="display-board" class="motherboard">
+        로딩 중...
+    </div>
+
+    <button class="edit-btn" onclick="editContent()">⚙️</button>
+
+<script>
+    // Firebase Config
+    const firebaseConfig = {
+        apiKey: "AIzaSyDP7WJoqi9hWXO27KaeY9Lvitj-5-E0j5Y",
+        authDomain: "bsar5-d7818.firebaseapp.com",
+        databaseURL: "https://bsar5-d7818-default-rtdb.firebaseio.com",
+        projectId: "bsar5-d7818",
+        storageBucket: "bsar5-d7818.firebasestorage.app",
+        messagingSenderId: "377629207721",
+        appId: "1:377629207721:web:8b893496c0ac1749890db8",
+        measurementId: "G-M9FJXYTS3F"
+    };
+
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // 1. 데이터 실시간 감지 (Read)
+    // DB의 'global_message'라는 방을 계속 쳐다보고 있습니다.
+    db.ref('global_message').on('value', (snapshot) => {
+        const text = snapshot.val();
+        const board = document.getElementById('display-board');
+        
+        if (text) {
+            // 줄바꿈 문자(\n)를 HTML 태그(<br>)로 변환
+            board.innerHTML = text.replace(/\n/g, '<br>');
+        } else {
+            board.innerText = "공지 사항이 없습니다.";
+        }
+    });
+
+    // 2. 수정 기능 (Write)
+    function editContent() {
+        const password = prompt("관리자 암호를 입력하세요:");
+        
+        if (password === "3968") {
+            const newText = prompt("마더보드에 띄울 내용을 입력하세요 (이모지 가능):");
+            if (newText !== null) { // 취소 안 눌렀으면 저장
+                db.ref('global_message').set(newText);
+                alert("업데이트 완료!");
+            }
+        } else {
+            if(password !== null) alert("암호가 틀렸습니다.");
+        }
+    }
+</script>
+
+</body>
+</html>
