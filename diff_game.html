@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>색깔 변화 카운팅</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        body { font-family: 'Pretendard', sans-serif; text-align: center; background: #f0f2f5; padding: 20px; box-sizing: border-box; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        /* 상단 컨트롤바 */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 15px; background: #eee; border-radius: 10px; flex-wrap: wrap; gap: 10px;}
+        .home-btn { background: #636e72; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .home-btn:hover { background: #2d3436; }
+        
+        .control-group { display: flex; gap: 5px; align-items: center; }
+        select, input { padding: 10px; font-size: 14px; border-radius: 5px; border: 1px solid #ccc; }
+        
+        .btn-move { padding:10px 15px; background:#00b894; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold; }
+        .btn-move:hover { background: #00a383; }
+        .btn-next { padding:10px 15px; background:#0984e3; color:white; border:none; border-radius:5px; cursor:pointer; font-weight:bold; margin-left: 5px;}
+        .btn-next:hover { background: #0077c8; }
+        
+        .timer { font-weight: bold; font-size: 20px; color: #d63031; min-width: 80px; text-align: right;}
+
+        /* 게임 영역 */
+        .game-area { display: flex; flex-wrap: wrap; justify-content: center; gap: 30px; margin-bottom: 20px; }
+        
+        .board-container { text-align: center; }
+        .board-label { font-weight: bold; margin-bottom: 10px; font-size: 18px; color: #333; }
+        
+        /* 그리드 동적 생성 */
+        .grid { 
+            display: grid; 
+            gap: 2px; /* 칸 사이 간격 */
+            background-color: #333; /* 테두리 역할 */
+            border: 2px solid #333; 
+            padding: 2px;
+        }
+
+        .cell {
+            width: 50px;
+            height: 50px;
+            border: 1px solid rgba(0,0,0,0.1); /* 내부 미세 테두리 */
+        }
+
+        /* 입력 및 결과 */
+        .input-section { margin-top: 20px; padding: 20px; background: #fafafa; border-radius: 10px; }
+        .answer-input { width: 150px; padding: 10px; font-size: 18px; text-align: center; }
+        .feedback { margin-top: 10px; font-weight: bold; font-size: 18px; min-height: 30px; }
+
+        /* 리더보드 */
+        .leaderboard { margin-top: 30px; border-top: 1px solid #ccc; padding-top: 10px; max-width: 600px; margin-left: auto; margin-right: auto;}
+        .rank-list { max-height: 200px; overflow-y: auto; text-align: left; }
+        .rank-item { padding: 8px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
+        .rank-1 { color: #d63031; font-weight: bold; background: #fff0f0; }
+        
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="top-bar">
+        <button class="home-btn" onclick="location.href='index.html'">🏠 홈으로</button>
+        
+        <div class="control-group">
+            <input type="text" id="nickname" placeholder="닉네임" style="width: 80px;">
+            
+            <select id="level-select" onchange="updateProblemSelect()">
+                <option value="lv1">1단계 (4x4)</option>
+                <option value="lv2">2단계 (4x5)</option>
+                <option value="lv3">3단계 (5x5)</option>
+                <option value="lv4">4단계 (5x6)</option>
+                <option value="lv5">5단계 (6x6)</option>
+            </select>
+
+            <select id="prob-select">
+                </select>
+            
+            <button class="btn-move" onclick="startGame()">이동</button>
+            <button class="btn-next" onclick="nextProblem()">다음 문제 ▶</button>
+        </div>
+        
+        <div id="timer-display" class="timer">0.00초</div>
+    </div>
+
+    <h1>🎨 색깔 변화 카운팅</h1>
+    <p style="color:#666; font-size:14px;">왼쪽과 오른쪽을 비교해서 색깔이 바뀐 칸의 개수를 입력하세요.</p>
+
+    <div class="game-area">
+        <div class="board-container">
+            <div class="board-label">기준 판</div>
+            <div id="grid1" class="grid"></div>
+        </div>
+        <div class="board-container">
+            <div class="board-label">문제 판</div>
+            <div id="grid2" class="grid"></div>
+        </div>
+    </div>
+
+    <div class="input-section">
+        <span>바뀐 칸의 개수는? </span>
+        <input type="number" id="user-answer" class="answer-input" placeholder="숫자 입력" onkeydown="if(event.key === 'Enter') checkAnswer()" disabled>
+        <div id="feedback-msg" class="feedback"></div>
+    </div>
+
+    <div class="leaderboard">
+        <div id="rank-title" style="font-weight:bold; margin-bottom:10px;">🏅 명예의 전당</div>
+        <div id="rank-list" class="rank-list">데이터 로딩 중...</div>
+    </div>
+</div>
+
+<script>
+    // ==========================================
+    // [설정] 사용자 정보 적용 완료
+    // ==========================================
+    const firebaseConfig = {
+        apiKey: "AIzaSyDP7WJoqi9hWXO27KaeY9Lvitj-5-E0j5Y",
+        authDomain: "bsar5-d7818.firebaseapp.com",
+        databaseURL: "https://bsar5-d7818-default-rtdb.firebaseio.com",
+        projectId: "bsar5-d7818",
+        storageBucket: "bsar5-d7818.firebasestorage.app",
+        messagingSenderId: "377629207721",
+        appId: "1:377629207721:web:8b893496c0ac1749890db8",
+        measurementId: "G-M9FJXYTS3F"
+    };
+
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // 색상 매핑
+    const COLOR_MAP = {
+        "빨강": "#ff7675", "노랑": "#ffeaa7", "파랑": "#0984e3", 
+        "초록": "#55efc4", "회색": "#b2bec3", "검정": "#2d3436", "갈색": "#a0522d"
+    };
+
+    let allData = {}; 
+    let currentLevel = "lv1";
+    let currentIdx = 0;
+    let currentProblem = null;
+    let startTime = 0;
+    let timerInterval = null;
+    let rankListener = null;
+
+    window.onload = function() {
+        loadData();
+    };
+
+    // 1. 데이터 로드
+    function loadData() {
+        const msg = document.getElementById('feedback-msg');
+        msg.innerText = "데이터 로딩 중...";
+        
+        // 업로더로 올린 diff_problems 경로에서 가져옴
+        db.ref('diff_problems').once('value').then(snap => {
+            allData = snap.val();
+            if(!allData) {
+                msg.innerText = "⚠️ DB에 문제가 없습니다. (diff_uploader.html 실행 필요)";
+                msg.style.color = "red";
+                return;
+            }
+            // 문제 선택박스 초기화
+            updateProblemSelect();
+            msg.innerText = "준비 완료! 이동 버튼을 누르세요.";
+            
+            // 자동 시작
+            startGame(); 
+        });
+    }
+
+    // 2. 레벨 변경 시 문제 목록 업데이트
+    function updateProblemSelect() {
+        const lvSelect = document.getElementById('level-select');
+        const probSelect = document.getElementById('prob-select');
+        currentLevel = lvSelect.value;
+        
+        probSelect.innerHTML = "";
+        if(allData[currentLevel]) {
+            allData[currentLevel].forEach((_, idx) => {
+                let opt = document.createElement('option');
+                opt.value = idx;
+                opt.text = `문제 ${idx + 1}`;
+                probSelect.appendChild(opt);
+            });
+        }
+    }
+
+    // 3. 게임 시작
+    function startGame() {
+        const nick = document.getElementById('nickname').value.trim();
+        const lvSelect = document.getElementById('level-select');
+        const probSelect = document.getElementById('prob-select');
+        
+        if(!allData[currentLevel]) return;
+
+        // 선택값 적용
+        currentLevel = lvSelect.value;
+        currentIdx = parseInt(probSelect.value);
+        currentProblem = allData[currentLevel][currentIdx];
+
+        // UI 초기화
+        const input = document.getElementById('user-answer');
+        input.value = "";
+        input.disabled = false;
+        input.focus();
+        document.getElementById('feedback-msg').innerText = "";
+
+        // 그리드 그리기
+        drawGrid('grid1', currentProblem.board1, currentProblem.rows, currentProblem.cols);
+        drawGrid('grid2', currentProblem.board2, currentProblem.rows, currentProblem.cols);
+
+        // 타이머 시작
+        if(timerInterval) clearInterval(timerInterval);
+        startTime = Date.now();
+        timerInterval = setInterval(() => {
+            document.getElementById('timer-display').innerText = ((Date.now() - startTime) / 1000).toFixed(2) + "초";
+        }, 30);
+
+        // 리더보드 로드
+        loadLeaderboard();
+    }
+
+    function drawGrid(elementId, boardData, rows, cols) {
+        const grid = document.getElementById(elementId);
+        grid.innerHTML = "";
+        
+        // CSS Grid 템플릿 설정
+        grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+        grid.style.width = `${cols * 50 + (cols-1)*2}px`; 
+
+        for(let r=0; r<rows; r++) {
+            for(let c=0; c<cols; c++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                const colorName = boardData[r][c];
+                cell.style.backgroundColor = COLOR_MAP[colorName] || colorName;
+                grid.appendChild(cell);
+            }
+        }
+    }
+
+    // 4. 다음 문제
+    function nextProblem() {
+        const probSelect = document.getElementById('prob-select');
+        let nextIdx = currentIdx + 1;
+        
+        if (!allData[currentLevel][nextIdx]) {
+            alert("해당 단계의 마지막 문제까지 풀었습니다!");
+            return;
+        }
+
+        probSelect.value = nextIdx;
+        startGame();
+    }
+
+    // 5. 정답 확인
+    function checkAnswer() {
+        const input = document.getElementById('user-answer');
+        const feedback = document.getElementById('feedback-msg');
+        const val = parseInt(input.value);
+
+        if (isNaN(val) || val < 0) return;
+
+        if (val === currentProblem.answer) {
+            // 정답
+            clearInterval(timerInterval);
+            const clearTime = ((Date.now() - startTime) / 1000).toFixed(2);
+            feedback.style.color = "#00b894";
+            feedback.innerText = `🎉 정답! (${clearTime}초)`;
+            input.disabled = true;
+            saveRecord(clearTime);
+        } else {
+            // 오답
+            feedback.style.color = "#d63031";
+            feedback.innerText = `❌ 오답입니다. 다시 세어보세요!`;
+            input.value = "";
+        }
+    }
+
+    // 6. 기록 저장
+    function saveRecord(time) {
+        const nick = document.getElementById('nickname').value;
+        if(!nick) return; 
+
+        db.ref(`diff_leaderboard/${currentLevel}/${currentIdx}`).push({
+            nickname: nick,
+            time: parseFloat(time),
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        });
+    }
+
+    // 7. 리더보드 로드
+    function loadLeaderboard() {
+        const list = document.getElementById('rank-list');
+        const title = document.getElementById('rank-title');
+        title.innerText = `🏅 명예의 전당 [${currentLevel.toUpperCase()} - 문제 ${currentIdx + 1}]`;
+        list.innerHTML = "로딩 중...";
+
+        if(rankListener) db.ref().off('value', rankListener);
+
+        const query = db.ref(`diff_leaderboard/${currentLevel}/${currentIdx}`).orderByChild('time').limitToFirst(20);
+        
+        rankListener = query.on('value', snap => {
+            list.innerHTML = "";
+            const data = snap.val();
+            if(!data) {
+                list.innerHTML = "<div style='padding:10px; color:#999;'>기록이 없습니다.</div>";
+                return;
+            }
+
+            let arr = [];
+            snap.forEach(child => arr.push(child.val()));
+
+            arr.forEach((item, idx) => {
+                const div = document.createElement('div');
+                div.className = `rank-item ${idx===0?'rank-1':''}`;
+                div.innerHTML = `
+                    <span>${idx+1}위 <b>${item.nickname}</b></span>
+                    <span style="font-weight:bold; color:${idx===0?'#d63031':'#0984e3'}">${item.time}초</span>
+                `;
+                list.appendChild(div);
+            });
+        });
+    }
+</script>
+
+</body>
+</html>
