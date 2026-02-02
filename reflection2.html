@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>반사게임 리뉴얼 (제작/풀이)</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <style>
+        :root { --bg-color: #2c3e50; --panel-bg: rgba(255,255,255,0.95); --accent: #e84393; }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: var(--bg-color); margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; user-select: none; }
+        
+        .screen { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 1200px; padding: 20px; box-sizing: border-box; }
+        .active { display: flex; }
+        h1, h2 { color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.3); margin-bottom: 20px; }
+        
+        button { background: var(--accent); color: white; border: none; padding: 10px 20px; margin: 5px; border-radius: 5px; font-size: 16px; cursor: pointer; transition: 0.2s; font-family: 'Noto Sans KR', sans-serif; }
+        button:hover { filter: brightness(0.9); transform: translateY(-2px); }
+        button.secondary { background: #e67e22; }
+        button.home-btn { background: #2d3436; border: 1px solid #dfe6e9; }
+        button.diff-btn { background: #636e72; width: 60px; height: 40px; margin: 3px; font-weight: bold; }
+        button.diff-btn.selected { background: #00b894; border: 2px solid white; transform: scale(1.1); }
+        button.auto-fill-btn { background: #6c5ce7; width: 100%; margin-top: 5px; font-weight: bold; }
+
+        input, select { padding: 10px; border-radius: 5px; border: none; font-size: 16px; margin: 5px; text-align: center; }
+        
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%; max-width: 500px; }
+        .menu-btn { height: 100px; font-size: 1.2em; font-weight: bold; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+
+        .creator-layout { display: flex; gap: 20px; align-items: flex-start; justify-content: center; flex-wrap: wrap; }
+        
+        .board-container { position: relative; background: #ecf0f1; padding: 10px; border-radius: 10px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .grid-table { border-collapse: collapse; background: white; margin: 0; }
+        .grid-cell { 
+            width: 40px; height: 40px; border: 1px solid #bdc3c7; 
+            text-align: center; font-weight: bold; font-size: 14px; color: #333; position: relative; 
+            cursor: default; box-sizing: border-box; overflow: hidden;
+        }
+        
+        #creator-grid .grid-cell { cursor: pointer; }
+        #creator-grid .grid-cell.selected { border: 3px solid #e74c3c; background-color: rgba(231, 76, 60, 0.2); z-index: 5; }
+        #creator-grid .grid-cell.typing { background-color: #fff3cd; border: 3px solid #ffc107; }
+        
+        .legend-box { background: rgba(0,0,0,0.4); padding: 15px; border-radius: 10px; color: white; font-size: 0.9em; min-width: 220px; text-align: left; }
+        .legend-item { margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+        .key-badge { background: #fff; color: #333; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-family: monospace; min-width: 20px; text-align: center; display: inline-block; box-shadow: 0 2px 0 #ccc; }
+        .legend-group { margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 5px; }
+        .legend-title { font-weight: bold; color: #f1c40f; margin-bottom: 8px; }
+
+        .wall { background-color: black !important; color: white !important; }
+        .arrow::after { position: absolute; top:0; left:0; width:100%; height:100%; display:flex; justify-content:center; align-items:center; font-size: 24px; text-shadow: 0 0 2px white; z-index: 15; font-weight:900; }
+        .arrow-up::after { content: '⬆️'; }
+        .arrow-down::after { content: '⬇️'; }
+        .arrow-left::after { content: '⬅️'; }
+        .arrow-right::after { content: '➡️'; }
+
+        .mirror-svg { position: absolute; top:0; left:0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
+        .mirror-line { stroke-width: 5; stroke-linecap: square; }
+        .red-mirror { stroke: #c0392b; }
+        .blue-mirror { stroke: #2980b9; }
+
+        #sim-layer { position: absolute; top: 10px; left: 10px; pointer-events: none; width: calc(11 * 40px); height: calc(11 * 40px); z-index: 50; }
+        .beam { stroke: #f1c40f; stroke-width: 4; stroke-linecap: round; opacity: 0.9; fill: none; filter: drop-shadow(0 0 2px orange); }
+
+        .answer-area { margin-top: 20px; background: rgba(0,0,0,0.5); padding: 20px; border-radius: 10px; text-align: center; width: 100%; max-width: 500px; }
+        #user-answer { width: 80%; font-weight: bold; color: #333; height: 30px; font-size: 1.1em; }
+
+        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); z-index: 100; justify-content: center; align-items: center; }
+        .modal-content { background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 400px; text-align: center; position: relative; }
+        .close-btn { position: absolute; top: 10px; right: 10px; background: transparent; color: #333; font-size: 24px; padding: 0; border: none; cursor: pointer; }
+        .list-box { max-height: 400px; overflow-y: auto; text-align: left; margin-top: 10px; padding: 10px; background: #f9f9f9; border-radius: 5px; }
+
+        /* 저장 팝업 전용 스타일 */
+        .diff-container { display: flex; justify-content: center; gap: 5px; margin: 15px 0; }
+        
+        .nav-header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; color: white; max-width: 800px; }
+        .rank-board { margin-top: 20px; width: 100%; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 5px; color: white; max-width: 500px; }
+        .rank-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.2); }
+        .rank-1 { color: #f1c40f; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div id="screen-home" class="screen active">
+        <h1>✨ 반사게임 리뉴얼</h1>
+        <div class="menu-grid">
+            <button class="menu-btn home-btn" onclick="goMainSite()">🏠 메인으로</button>
+            <button class="menu-btn" onclick="showCreator()">🔨 문제 제작</button>
+            <button class="menu-btn" onclick="showSolverSetup()">🎮 문제 풀이</button>
+            <button class="menu-btn secondary" onclick="checkRemaining()">📋 남은 문제 확인</button>
+        </div>
+    </div>
+
+    <div id="screen-creator" class="screen">
+        <div class="nav-header">
+            <h2>문제 제작소 (11x11)</h2>
+            <button class="secondary" onclick="goHome()">메뉴로</button>
+        </div>
+
+        <div class="creator-layout">
+            <div class="board-container">
+                <table id="creator-grid" class="grid-table"></table>
+                <svg id="sim-layer"></svg>
+            </div>
+            <div class="legend-box">
+                <div class="legend-group">
+                    <div class="legend-title">🛠️ 배치 도구</div>
+                    <div class="legend-item"><span class="key-badge">W</span> <span>벽 (검은색)</span></div>
+                    <div class="legend-item"><span class="key-badge">A</span> <span>빨간색 / 거울</span></div>
+                    <div class="legend-item"><span class="key-badge">S</span> <span>파란색 / 거울</span></div>
+                    <div class="legend-item"><span class="key-badge">D</span> <span>빨간색 \ 거울</span></div>
+                    <div class="legend-item"><span class="key-badge">F</span> <span>파란색 \ 거울</span></div>
+                    <div class="legend-item"><span class="key-badge">방향키</span> <span>빛(화살표) 생성</span></div>
+                    <div class="legend-item"><span class="key-badge">0-9</span> <span>숫자 입력</span></div>
+                    <div class="legend-item"><span class="key-badge">Enter</span> <span>숫자 입력 완료</span></div>
+                    <div class="legend-item"><span class="key-badge">Del</span> <span>선택 지우기</span></div>
+                    <button class="auto-fill-btn" onclick="autoFillCells()">✨ 자동 채우기</button>
+                </div>
+                <div class="legend-group">
+                    <div class="legend-title">💾 시스템</div>
+                    <div class="legend-item"><span class="key-badge">Q</span> <span>문제 저장하기</span></div>
+                    <div class="legend-item"><span class="key-badge">E</span> <span>경로 미리보기</span></div>
+                    <div class="legend-item"><span class="key-badge">R</span> <span>모두 지우기</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-solver-setup" class="screen">
+        <div class="nav-header">
+            <h2>난이도 선택</h2>
+            <button class="secondary" onclick="goHome()">뒤로가기</button>
+        </div>
+        <div style="background: white; padding: 40px; border-radius: 15px; display: flex; flex-direction: column; gap: 15px; width: 300px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+            <input type="text" id="player-name" placeholder="닉네임 입력">
+            <select id="diff-select">
+                <option value="4x4">4x4</option>
+                <option value="5x5">5x5</option>
+                <option value="6x6">6x6</option>
+                <option value="7x7">7x7</option>
+                <option value="8x8">8x8</option>
+            </select>
+            <input type="number" id="prob-num" placeholder="문제 번호" min="1">
+            <button onclick="startSolving()" style="margin-top:10px;">이동</button>
+        </div>
+    </div>
+
+    <div id="screen-game" class="screen">
+        <div class="nav-header">
+            <h2 id="game-title">문제 풀이</h2>
+            <button class="secondary" onclick="showSolverSetup()">나가기</button>
+        </div>
+        <div class="board-container">
+            <table id="game-grid" class="grid-table"></table>
+        </div>
+        <div class="answer-area">
+            <div style="color:white; margin-bottom:10px; font-size:1.1em;">
+                화살표에서 출발한 빛이 도착하는 곳의<br>숫자들을 모두 입력하세요.
+            </div>
+            <input type="text" id="user-answer" placeholder="예: 1 5 12" onkeydown="if(event.key==='Enter') submitAnswer()">
+            <br>
+            <button onclick="submitAnswer()" class="secondary" style="margin-top:15px; width: 100px;">정답 제출</button>
+            <button onclick="nextProblem()" style="margin-top:15px; width: 100px; background-color: #00b894;">다음 문제</button>
+            <div id="game-status" style="margin-top:15px; font-weight:bold; height:20px; font-size:1.1em;"></div>
+        </div>
+        <div class="rank-board">
+            <h3 style="margin-top:0; border-bottom:1px solid #aaa; padding-bottom:10px;">🏆 실시간 기록</h3>
+            <div id="game-ranks"></div>
+        </div>
+    </div>
+
+    <div id="popup-remaining" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closePopup('popup-remaining')">✖</button>
+            <h3 style="color:#333;">📁 등록된 문제 현황</h3>
+            <div id="remaining-list" class="list-box">로딩중...</div>
+        </div>
+    </div>
+
+    <div id="popup-save" class="modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closePopup('popup-save')">✖</button>
+            <h3 style="color:#333; margin-bottom:5px;">💾 문제 저장</h3>
+            <p style="color:#666; font-size:0.9em; margin-bottom:15px;">난이도를 선택하세요</p>
+            
+            <div class="diff-container">
+                <button class="diff-btn" onclick="selectSaveDiff('4x4')">4x4</button>
+                <button class="diff-btn" onclick="selectSaveDiff('5x5')">5x5</button>
+                <button class="diff-btn" onclick="selectSaveDiff('6x6')">6x6</button>
+                <button class="diff-btn" onclick="selectSaveDiff('7x7')">7x7</button>
+                <button class="diff-btn" onclick="selectSaveDiff('8x8')">8x8</button>
+            </div>
+
+            <input type="number" id="save-prob-num" placeholder="문제 번호 (예: 1)" style="width:80%; margin-top:10px;">
+            <br>
+            <button onclick="commitSave()" style="margin-top:15px; width:100%; background:#0984e3;">저장하기</button>
+        </div>
+    </div>
+
+<script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDP7WJoqi9hWXO27KaeY9Lvitj-5-E0j5Y",
+      authDomain: "bsar5-d7818.firebaseapp.com",
+      databaseURL: "https://bsar5-d7818-default-rtdb.firebaseio.com",
+      projectId: "bsar5-d7818",
+      storageBucket: "bsar5-d7818.firebasestorage.app",
+      messagingSenderId: "377629207721",
+      appId: "1:377629207721:web:8b893496c0ac1749890db8",
+      measurementId: "G-M9FJXYTS3F"
+    };
+    let db;
+    try { firebase.initializeApp(firebaseConfig); db = firebase.database(); } catch(e) {}
+
+    const GRID_SIZE = 11;
+    const CELL_SIZE = 40;
+    const EMPTY=0, WALL=1, MIRROR_RED_SLASH=2, MIRROR_RED_BACKSLASH=3, MIRROR_BLUE_SLASH=4, MIRROR_BLUE_BACKSLASH=5;
+    let creatorGridData = [], selectedCells = new Set(), isDragging = false;
+    let keyInputBuffer = ""; 
+    let currentProblem = null, currentDiff = "", currentNum = 0, startTime = 0;
+    
+    // 저장용 변수
+    let saveSelectedDiff = "";
+
+    function showScreen(id) { document.querySelectorAll('.screen').forEach(el => el.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+    function goHome() { showScreen('screen-home'); }
+    function goMainSite() { window.location.href = "index.html"; } 
+    function showCreator() { initCreatorGrid(); showScreen('screen-creator'); }
+    function showSolverSetup() { document.getElementById('player-name').value = ""; document.getElementById('prob-num').value = ""; showScreen('screen-solver-setup'); }
+
+    function initCreatorGrid() {
+        const table = document.getElementById('creator-grid');
+        table.innerHTML = ''; document.getElementById('sim-layer').innerHTML = '';
+        creatorGridData = Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill().map(()=>({ type: EMPTY, text: "", arrow: null })));
+        selectedCells.clear();
+        keyInputBuffer = "";
+        for(let r=0; r<GRID_SIZE; r++) {
+            const tr = document.createElement('tr');
+            for(let c=0; c<GRID_SIZE; c++) {
+                const td = document.createElement('td');
+                td.className = 'grid-cell'; td.dataset.r = r; td.dataset.c = c;
+                td.addEventListener('mousedown', (e) => startSelection(r, c, e));
+                td.addEventListener('mouseover', (e) => updateSelection(r, c, e));
+                td.addEventListener('mouseup', endSelection);
+                tr.appendChild(td);
+            }
+            table.appendChild(tr);
+        }
+        document.addEventListener('mouseup', endSelection);
+    }
+    
+    function startSelection(r, c, e) { 
+        if(e.button!==0)return; 
+        isDragging=true; 
+        keyInputBuffer = ""; 
+        if(!e.ctrlKey) selectedCells.clear(); 
+        selectedCells.has(`${r},${c}`)?(!e.ctrlKey&&selectedCells.add(`${r},${c}`)):selectedCells.add(`${r},${c}`); 
+        if(e.ctrlKey&&selectedCells.has(`${r},${c}`)){}else selectedCells.add(`${r},${c}`); 
+        renderCreatorView(); 
+    }
+    
+    function updateSelection(r, c, e) { if(isDragging) { selectedCells.add(`${r},${c}`); renderCreatorView(); } }
+    function endSelection() { isDragging = false; }
+    
+    function renderCreatorView() {
+        const table = document.getElementById('creator-grid');
+        for(let r=0; r<GRID_SIZE; r++) {
+            for(let c=0; c<GRID_SIZE; c++) {
+                const cell = table.rows[r].cells[c]; const data = creatorGridData[r][c]; const key = `${r},${c}`;
+                cell.className = 'grid-cell ' + (selectedCells.has(key)?'selected':''); 
+                if(selectedCells.has(key) && keyInputBuffer !== "") cell.classList.add('typing');
+                cell.innerHTML = ''; 
+                if(data.text) cell.innerText = data.text;
+                if(data.type === WALL) cell.classList.add('wall');
+                if(data.arrow) cell.classList.add(`arrow`, `arrow-${data.arrow.toLowerCase()}`);
+                else cell.classList.remove('arrow', 'arrow-up', 'arrow-down', 'arrow-left', 'arrow-right');
+                if(data.type >= 2) cell.appendChild(createMirrorSVG(data.type));
+            }
+        }
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if(!document.getElementById('screen-creator').classList.contains('active')) return;
+        if(e.target.tagName === 'INPUT') return;
+        
+        const key = e.key;
+
+        if(!isNaN(key) && key !== ' ') {
+            keyInputBuffer += key; applyAction(c => c.text = keyInputBuffer); renderCreatorView(); return;
+        }
+        if(key === 'Enter') {
+            keyInputBuffer = ""; renderCreatorView(); return;
+        }
+        if(key === 'Backspace') {
+            if(keyInputBuffer.length > 0) { keyInputBuffer = keyInputBuffer.slice(0, -1); applyAction(c => c.text = keyInputBuffer); }
+            else { applyAction(c => { c.text = ""; c.type = EMPTY; c.arrow = null; }); }
+            renderCreatorView(); return;
+        }
+
+        const keyLower = key.toLowerCase();
+        if(['q','w','e','r','t','a','s','d','f','arrowup','arrowdown','arrowleft','arrowright','delete'].includes(keyLower)) { keyInputBuffer = ""; }
+
+        switch(keyLower) {
+            case 'q': openSavePopup(); break; // [CHANGED] Q 누르면 팝업 열기
+            case 'w': applyAction(c => c.type = (c.type===WALL ? EMPTY : WALL)); break;
+            case 'e': simulateLightCreator(); break;
+            case 'r': if(confirm("초기화?")) initCreatorGrid(); break;
+            case 't': initCreatorGrid(); break;
+            case 'a': applyAction(c => c.type = MIRROR_RED_SLASH); break;
+            case 's': applyAction(c => c.type = MIRROR_BLUE_SLASH); break;
+            case 'd': applyAction(c => c.type = MIRROR_RED_BACKSLASH); break;
+            case 'f': applyAction(c => c.type = MIRROR_BLUE_BACKSLASH); break;
+            case 'arrowup': applyAction(c => c.arrow = 'UP'); break;
+            case 'arrowdown': applyAction(c => c.arrow = 'DOWN'); break;
+            case 'arrowleft': applyAction(c => c.arrow = 'LEFT'); break;
+            case 'arrowright': applyAction(c => c.arrow = 'RIGHT'); break;
+            case 'delete': applyAction(c => { c.text = ""; c.type = EMPTY; c.arrow = null; }); break;
+        }
+        if(keyLower !== 'e') document.getElementById('sim-layer').innerHTML = '';
+        renderCreatorView();
+    });
+
+    function applyAction(fn) { selectedCells.forEach(key => { const [r, c] = key.split(',').map(Number); fn(creatorGridData[r][c]); }); }
+
+    // [NEW] 자동 채우기 기능
+    function autoFillCells() {
+        if(selectedCells.size === 0) return alert("채울 칸들을 선택해주세요!");
+        
+        // 5가지 경우 (빈칸, 거울4종) 각 20%
+        applyAction(c => {
+            // 벽이나 화살표가 있는 곳은 건드리지 않음 (안전장치)
+            if(c.type === WALL || c.arrow) return;
+
+            const rand = Math.random();
+            if(rand < 0.2) c.type = EMPTY;
+            else if(rand < 0.4) c.type = MIRROR_RED_SLASH;
+            else if(rand < 0.6) c.type = MIRROR_BLUE_SLASH;
+            else if(rand < 0.8) c.type = MIRROR_RED_BACKSLASH;
+            else c.type = MIRROR_BLUE_BACKSLASH;
+        });
+        renderCreatorView();
+    }
+
+    // [NEW] 저장 팝업 열기
+    function openSavePopup() {
+        saveSelectedDiff = "";
+        document.getElementById('save-prob-num').value = "";
+        document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected'));
+        document.getElementById('popup-save').style.display = 'flex';
+    }
+
+    // [NEW] 난이도 버튼 선택
+    function selectSaveDiff(diff) {
+        saveSelectedDiff = diff;
+        document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected'));
+        // 버튼 텍스트가 diff인 요소 찾아서 활성화
+        const btns = document.querySelectorAll('.diff-btn');
+        for(let btn of btns) {
+            if(btn.innerText === diff) btn.classList.add('selected');
+        }
+    }
+
+    // [NEW] 실제 저장 실행
+    function commitSave() {
+        if(!saveSelectedDiff) return alert("난이도 버튼을 눌러주세요!");
+        const num = document.getElementById('save-prob-num').value;
+        if(!num || isNaN(num)) return alert("문제 번호를 입력하세요.");
+
+        // 정답 계산
+        const calculatedSolution = calculateSolution(creatorGridData);
+        if(calculatedSolution.length === 0 && !confirm("정답(빛 도착지점의 숫자)이 없습니다.\n그대로 저장할까요?")) return;
+
+        const path = `problems/${saveSelectedDiff}/${parseInt(num)}`;
+        db.ref(path).once('value', snapshot => {
+            if(snapshot.exists()) {
+                alert("이미 존재하는 번호입니다. 다른 번호를 써주세요.");
+            } else {
+                db.ref(path).set({
+                    grid: creatorGridData,
+                    solution: calculatedSolution,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                }).then(() => {
+                    alert(`✅ [${saveSelectedDiff}] ${num}번 문제 저장 완료!`);
+                    closePopup('popup-save');
+                });
+            }
+        });
+    }
+
+    function calculateSolution(grid) {
+        const answers = new Set(); let lights = [];
+        for(let r=0; r<GRID_SIZE; r++) for(let c=0; c<GRID_SIZE; c++) if(grid[r][c].arrow) {
+            let dr=0, dc=0; if(grid[r][c].arrow==='UP') dr=-1; if(grid[r][c].arrow==='DOWN') dr=1; if(grid[r][c].arrow==='LEFT') dc=-1; if(grid[r][c].arrow==='RIGHT') dc=1;
+            lights.push({r, c, dr, dc});
+        }
+        let queue = lights.map(l => ({...l, step:0})), visited = new Set(); 
+        while(queue.length > 0) {
+            let curr = queue.shift(); let nr = curr.r + curr.dr, nc = curr.c + curr.dc;
+            if(nr < 0 || nr >= GRID_SIZE || nc < 0 || nc >= GRID_SIZE) continue;
+            let cell = grid[nr][nc];
+            if(cell.text && !isNaN(cell.text) && cell.text.trim() !== "") answers.add(parseInt(cell.text));
+            if(cell.type === WALL) continue;
+            let stateKey = `${nr},${nc},${curr.dr},${curr.dc}`; if(visited.has(stateKey)) continue; visited.add(stateKey); if(curr.step > 300) continue; 
+            getReflection(curr.dr, curr.dc, cell.type).forEach(d => queue.push({r: nr, c: nc, dr: d[0], dc: d[1], step: curr.step+1}));
+        }
+        return Array.from(answers).sort((a,b)=>a-b);
+    }
+    
+    function simulateLightCreator() {
+        const svg = document.getElementById('sim-layer'); svg.innerHTML = '';
+        let lights = [];
+        for(let r=0; r<GRID_SIZE; r++) for(let c=0; c<GRID_SIZE; c++) if(creatorGridData[r][c].arrow) {
+            let dr=0, dc=0; if(creatorGridData[r][c].arrow==='UP') dr=-1; if(creatorGridData[r][c].arrow==='DOWN') dr=1; if(creatorGridData[r][c].arrow==='LEFT') dc=-1; if(creatorGridData[r][c].arrow==='RIGHT') dc=1;
+            lights.push({r, c, dr, dc});
+        }
+        
+        if(lights.length === 0) {
+            alert("⚠️ 빛이 나올 화살표가 없습니다!\n방향키(↑↓←→)를 눌러 화살표를 배치해주세요.");
+            return;
+        }
+
+        let queue = lights.map(l => ({...l, step:0})), visited = new Set();
+        while(queue.length > 0) {
+            let curr = queue.shift(); let nr = curr.r + curr.dr, nc = curr.c + curr.dc;
+            if(nr < 0 || nr >= GRID_SIZE || nc < 0 || nc >= GRID_SIZE) continue;
+            drawLine(svg, curr.c, curr.r, nc, nr);
+            let cell = creatorGridData[nr][nc]; if(cell.type === WALL) continue;
+            let stateKey = `${nr},${nc},${curr.dr},${curr.dc}`; if(visited.has(stateKey)) continue; visited.add(stateKey); if(curr.step > 300) continue;
+            getReflection(curr.dr, curr.dc, cell.type).forEach(d => queue.push({r: nr, c: nc, dr: d[0], dc: d[1], step: curr.step+1}));
+        }
+    }
+
+    function getReflection(dr, dc, type) {
+        if(type === EMPTY) return [[dr, dc]];
+        if(type === MIRROR_RED_SLASH) return [[-dc, -dr]]; 
+        if(type === MIRROR_BLUE_SLASH) return [[dr, dc], [-dc, -dr]]; 
+        if(type === MIRROR_RED_BACKSLASH) return [[dc, dr]];
+        if(type === MIRROR_BLUE_BACKSLASH) return [[dr, dc], [dc, dr]]; 
+        return [];
+    }
+    function drawLine(svg, x1, y1, x2, y2) {
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        const center = CELL_SIZE / 2;
+        line.setAttribute("x1", x1 * CELL_SIZE + center); line.setAttribute("y1", y1 * CELL_SIZE + center);
+        line.setAttribute("x2", x2 * CELL_SIZE + center); line.setAttribute("y2", y2 * CELL_SIZE + center);
+        line.setAttribute("class", "beam"); svg.appendChild(line);
+    }
+    function createMirrorSVG(type) {
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg"); svg.setAttribute("class", "mirror-svg"); svg.setAttribute("viewBox", "0 0 100 100");
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("class", "mirror-line " + (type===2||type===3 ? "red-mirror":"blue-mirror"));
+        if(type===MIRROR_RED_SLASH || type===MIRROR_BLUE_SLASH) { line.setAttribute("x1", "100"); line.setAttribute("y1", "0"); line.setAttribute("x2", "0"); line.setAttribute("y2", "100"); } 
+        else { line.setAttribute("x1", "0"); line.setAttribute("y1", "0"); line.setAttribute("x2", "100"); line.setAttribute("y2", "100"); }
+        svg.appendChild(line); return svg;
+    }
+
+    function startSolving() {
+        const name = document.getElementById('player-name').value.trim();
+        const diff = document.getElementById('diff-select').value;
+        const num = document.getElementById('prob-num').value;
+        if(!name || !num) return alert("입력값 확인");
+        loadProblem(diff, num);
+    }
+    function loadProblem(diff, num) {
+        db.ref(`problems/${diff}/${num}`).once('value').then(snapshot => {
+            if(!snapshot.exists()) return alert("문제 없음");
+            const data = snapshot.val(); currentProblem = data; currentDiff = diff; currentNum = parseInt(num);
+            renderSolverGrid(data.grid);
+            document.getElementById('game-title').innerText = `문제 ${num} (${diff})`;
+            document.getElementById('game-status').innerText = "";
+            document.getElementById('user-answer').value = "";
+            showScreen('screen-game'); loadGameRanks(diff, num); startTime = new Date().getTime();
+        });
+    }
+    function renderSolverGrid(gridData) {
+        const table = document.getElementById('game-grid'); table.innerHTML = '';
+        for(let r=0; r<GRID_SIZE; r++) {
+            const tr = document.createElement('tr');
+            for(let c=0; c<GRID_SIZE; c++) {
+                const td = document.createElement('td'); const data = gridData[r][c]; td.className = 'grid-cell';
+                if(data.type === WALL) td.classList.add('wall');
+                if(data.text) td.innerText = data.text;
+                if(data.arrow) td.classList.add(`arrow`, `arrow-${data.arrow.toLowerCase()}`);
+                if(data.type >= 2) td.appendChild(createMirrorSVG(data.type));
+                tr.appendChild(td);
+            }
+            table.appendChild(tr);
+        }
+    }
+    function submitAnswer() {
+        const input = document.getElementById('user-answer').value;
+        const userNums = input.split(/[ ,]+/).filter(v => v.trim() !== "").map(Number);
+        if(userNums.some(isNaN)) return document.getElementById('game-status').innerText = "❌ 숫자만!";
+        const userSet = new Set(userNums);
+        if(userSet.size !== userNums.length) return document.getElementById('game-status').innerText = "❌ 중복!";
+        const solutionSet = new Set(currentProblem.solution || []); 
+        let correct = (userSet.size === solutionSet.size);
+        if(correct) { for(let num of userSet) if(!solutionSet.has(num)) { correct = false; break; } }
+        if(correct) {
+            const timeTaken = ((new Date().getTime() - startTime) / 1000).toFixed(2);
+            document.getElementById('game-status').innerText = `🎉 정답! (${timeTaken}초)`;
+            document.getElementById('game-status').style.color = "#f1c40f";
+            const name = document.getElementById('player-name').value;
+            db.ref(`records/${currentDiff}/${currentNum}`).push({ name: name, time: parseFloat(timeTaken), timestamp: firebase.database.ServerValue.TIMESTAMP });
+            loadGameRanks(currentDiff, currentNum);
+        } else {
+            document.getElementById('game-status').innerText = "❌ 오답"; document.getElementById('game-status').style.color = "#e74c3c";
+        }
+    }
+    function nextProblem() { loadProblem(currentDiff, currentNum + 1); }
+    function loadGameRanks(diff, num) {
+        const div = document.getElementById('game-ranks'); div.innerHTML = "로딩중...";
+        db.ref(`records/${diff}/${num}`).orderByChild('time').limitToFirst(5).once('value').then(snap => {
+            div.innerHTML = ""; if(!snap.exists()) return div.innerHTML = "기록 없음";
+            const list = []; snap.forEach(c => list.push(c.val()));
+            list.sort((a,b) => a.time - b.time);
+            list.forEach((rec, idx) => {
+                const row = document.createElement('div'); row.className = 'rank-item'; if(idx===0) row.classList.add('rank-1');
+                row.innerHTML = `<span>${idx+1}위 ${rec.name}</span> <span>${rec.time}s</span>`; div.appendChild(row);
+            });
+        });
+    }
+    function checkRemaining() {
+        document.getElementById('popup-remaining').style.display = 'flex'; const list = document.getElementById('remaining-list'); list.innerHTML = "조회 중...";
+        db.ref('problems').once('value').then(snap => {
+            if(!snap.exists()) { list.innerHTML = "문제 없음"; return; }
+            let html = ""; snap.forEach(d => { const nums = []; d.forEach(p => nums.push(parseInt(p.key))); nums.sort((a,b)=>a-b); html += `<div style="margin-bottom:10px;"><b>[${d.key}]</b> 총 ${nums.length}문제<br><span style="color:#555; font-size:0.9em;">(No. ${nums.join(', ')})</span></div>`; });
+            list.innerHTML = html;
+        });
+    }
+    function closePopup(id) { document.getElementById(id).style.display = 'none'; }
+</script>
+</body>
+</html>
