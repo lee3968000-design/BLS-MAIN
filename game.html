@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>역쌍근 연습</title>
+    <title>역쌍근 연습 - 타임어택</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
@@ -53,7 +53,7 @@
         .rank-list { max-height: 300px; overflow-y: auto; }
         .rank-item { padding: 10px; border-bottom: 1px solid #f1f1f1; font-size: 14px; display: flex; justify-content: space-between;}
         .rank-1 { color: #d63031; font-weight: bold; background: #fff0f0; }
-        .rank-time { color: #aaa; font-size: 12px; }
+        .rank-time { color: #0984e3; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -64,7 +64,7 @@
     </div>
 
     <h1><역쌍근 연습></h1>
-    <div class="sub-title">표준국어대사전 2글자 챌린지</div>
+    <div class="sub-title">표준국어대사전 2글자 챌린지 (타임어택)</div>
     
     <div class="control-panel">
         <input type="text" id="nickname" placeholder="닉네임" style="width: 100px;">
@@ -97,7 +97,7 @@
     </div>
 
     <div class="leaderboard">
-        <h3>🏅 명예의 전당 (실시간)</h3>
+        <h3>🏅 명예의 전당 (Fastest)</h3>
         <div id="rank-list" class="rank-list">불러오는 중...</div>
     </div>
 </div>
@@ -122,6 +122,9 @@
     let currentProblem = null;
     let currentLevel = "lv1";
     let currentQIdx = 0;
+    
+    // 타임어택용 변수
+    let startTime = 0;
 
     window.onload = async function() {
         document.getElementById('status-msg').innerText = "사전 데이터를 다운로드 중입니다...";
@@ -158,6 +161,9 @@
         document.getElementById('status-msg').style.color = "black";
         document.getElementById('game-board').innerHTML = "문제를 불러오는 중...";
 
+        // 리더보드 먼저 로드
+        loadLeaderboard();
+
         db.ref(`problems/${currentLevel}/${currentQIdx}`).once('value').then(snap => {
             currentProblem = snap.val();
             if(!currentProblem) {
@@ -179,11 +185,25 @@
                 `;
                 board.appendChild(row);
             });
-            loadLeaderboard();
+
+            // ★ 게임 시작 시간 기록 ★
+            startTime = Date.now();
         });
     }
 
-    // 자모 분해 및 규칙 체크 (Rule 7 적용)
+    // 시간 포맷팅 함수 (밀리초 -> 0분 00초 00)
+    function formatTime(ms) {
+        const minutes = Math.floor(ms / 60000);
+        const seconds = Math.floor((ms % 60000) / 1000);
+        const centiseconds = Math.floor((ms % 1000) / 10); // 10ms 단위
+
+        const fSec = seconds < 10 ? `0${seconds}` : seconds;
+        const fCent = centiseconds < 10 ? `0${centiseconds}` : centiseconds;
+
+        return `${minutes}분 ${fSec}초 ${fCent}`;
+    }
+
+    // 자모 분해 및 규칙 체크 로직은 기존 유지
     const CHO = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
     const JUNG = ["ㅏ","ㅐ","ㅑ","ㅒ","ㅓ","ㅔ","ㅕ","ㅖ","ㅗ","ㅘ","ㅙ","ㅚ","ㅛ","ㅜ","ㅝ","ㅞ","ㅟ","ㅠ","ㅡ","ㅢ","ㅣ"];
     const JONG = ["","ㄱ","ㄲ","ㄳ","ㄴ","ㄵ","ㄶ","ㄷ","ㄹ","ㄺ","ㄻ","ㄼ","ㄽ","ㄾ","ㄿ","ㅀ","ㅁ","ㅂ","ㅄ","ㅅ","ㅆ","ㅇ","ㅈ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
@@ -231,6 +251,8 @@
     function checkAnswer() {
         const nick = document.getElementById('nickname').value.trim();
         if(!nick) { alert("닉네임을 먼저 입력해주세요!"); return; }
+        // 닉네임에 ., #, $, [, ] 등 특수문자가 포함되면 firebase key로 쓸 수 없으므로 간단 처리
+        if(/[.#$\[\]]/.test(nick)) { alert("닉네임에 특수문자(., #, $, [, ])는 사용할 수 없습니다."); return; }
 
         const inputRaw = document.getElementById('user-answer').value.trim();
         const inputs = inputRaw.split(/\s+/);
@@ -261,34 +283,74 @@
         }
 
         if(pass) {
-            status.innerText = "🎉 정답입니다!!";
+            // ★ 종료 시간 계산 ★
+            const endTime = Date.now();
+            const elapsed = endTime - startTime;
+            const timeStr = formatTime(elapsed);
+
+            status.innerText = `🎉 정답입니다!! (${timeStr})`;
             status.style.color = "#0984e3";
             document.getElementById('user-answer').disabled = true;
-            saveRecord(nick);
+            
+            // 기록 저장 함수 호출 (밀리초, 문자열)
+            saveRecord(nick, elapsed, timeStr);
         } else {
             status.innerText = "❌ 오답입니다:\n" + logs;
             status.style.color = "#d63031";
         }
     }
 
-    function saveRecord(nick) {
-        const path = `leaderboard/${currentLevel}/${currentQIdx}`;
-        db.ref(path).push({ nickname: nick, time: new Date().toLocaleString() });
+    function saveRecord(nick, elapsedMs, displayTime) {
+        // 기존: push로 무조건 추가 -> 변경: 닉네임 기준 갱신
+        const path = `leaderboard/${currentLevel}/${currentQIdx}/${nick}`;
+        
+        db.ref(path).once('value').then(snap => {
+            const data = snap.val();
+            // 기록이 없거나, 새로운 기록이 더 빠를(작을) 경우 저장
+            if (!data || elapsedMs < data.recordMs) {
+                db.ref(path).set({
+                    nickname: nick,
+                    recordMs: elapsedMs, // 정렬용 숫자
+                    displayTime: displayTime, // 표시용 문자열
+                    timestamp: Date.now()
+                }).then(() => {
+                    // 저장 후 알림은 선택사항 (여기선 생략하고 리더보드 갱신)
+                    // alert("신기록 갱신!"); 
+                });
+            } else {
+                // 기존 기록이 더 좋은 경우 (아무것도 안 하거나 메시지 표시)
+                // console.log("기존 기록이 더 좋습니다.");
+            }
+        });
     }
 
     function loadLeaderboard() {
         const list = document.getElementById('rank-list');
         list.innerHTML = "로딩 중...";
+        
+        // recordMs 기준으로 오름차순 정렬 (작은 시간이 1등)
         const path = `leaderboard/${currentLevel}/${currentQIdx}`;
-        db.ref(path).limitToLast(30).on('value', snap => {
+        
+        db.ref(path).orderByChild('recordMs').limitToFirst(30).on('value', snap => {
             list.innerHTML = "";
-            const data = snap.val();
-            if(!data) { list.innerHTML = "<div style='padding:10px; color:#999;'>아직 정답자가 없습니다.</div>"; return; }
-            const arr = Object.values(data).reverse();
-            arr.forEach((item, idx) => {
+            const records = [];
+            
+            snap.forEach(child => {
+                records.push(child.val());
+            });
+
+            if(records.length === 0) {
+                list.innerHTML = "<div style='padding:10px; color:#999;'>아직 정답자가 없습니다.</div>"; 
+                return; 
+            }
+
+            records.forEach((item, idx) => {
                 const div = document.createElement('div');
                 div.className = `rank-item ${idx===0?'rank-1':''}`;
-                div.innerHTML = `<span>${idx+1}위 : <b>${item.nickname}</b></span><span class="rank-time">${item.time}</span>`;
+                div.innerHTML = `
+                    <span>${idx+1}위 : <b>${item.nickname}</b></span>
+                    <span class="rank-time">${item.displayTime}</span>
+                `;
                 list.appendChild(div);
             });
         });
