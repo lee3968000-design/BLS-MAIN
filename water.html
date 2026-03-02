@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>물용량 맞추기 게임</title>
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; padding: 20px; background-color: #f4f4f9; display: flex; flex-direction: column; align-items: center; }
+        .container { max-width: 800px; width: 100%; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .dashboard { margin-top: 30px; padding: 15px; background: #e2e8f0; border-radius: 8px; }
+        .btn-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
+        button { padding: 10px 15px; border: none; background: #00cec9; color: white; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #00b8b2; }
+        .danger-btn { background: #ff7675; }
+        .danger-btn:hover { background: #d63031; }
+        .move-btn { background: #6c5ce7; }
+        .move-btn:hover { background: #4834d4; }
+        #userInputDisplay { width: 100%; height: 100px; margin-top: 15px; font-size: 14px; padding: 10px; box-sizing: border-box; background: #edf2f7; border: 2px solid #cbd5e0; resize: none; }
+        .problem-info { background: #fffaf0; padding: 15px; border-left: 5px solid #fdcb6e; margin-bottom: 20px; }
+        .top-controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        select { padding: 8px; border-radius: 5px; border: 1px solid #ccc; }
+        .leaderboard-item { margin-bottom: 5px; padding: 8px; background: white; border-radius: 4px; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>💧 물용량 맞추기 훈련소</h2>
+    <a href="index.html" style="display:inline-block; margin-bottom:15px; color:#6c5ce7; text-decoration:none; font-weight:bold;">⬅️ 메인으로 돌아가기</a>
+    
+    <div class="top-controls">
+        <select id="levelSelect" onchange="updateProblemList()">
+            <option value="lvl1">난이도 하 (물통 3개)</option>
+            <option value="lvl2">난이도 상 (물통 3~4개)</option>
+            <option value="lvl3">난이도 하 (물통 4개)</option>
+            <option value="lvl4">난이도 상 (물통 4~5개)</option>
+        </select>
+        <select id="problemSelect"></select>
+        <button onclick="startProblem()">도전 시작</button>
+        <button onclick="nextProblem()" style="background:#0984e3;">다음 문제 ➔</button>
+    </div>
+
+    <div class="problem-info" id="problemArea" style="display:none;">
+        <h3 id="problemTitle"></h3>
+        <p><strong>초기 상태:</strong> <span id="initialState" style="color:#0984e3; font-weight:bold;"></span></p>
+        <p style="font-size: 1.2rem; color: #d63031;"><strong>미션:</strong> <span id="missionText"></span></p>
+        <p><strong>제한 횟수:</strong> <span id="maxMoves"></span>회 (현재 <span id="currentMoves">0</span>회 입력함)</p>
+        <h3>⏱️ 소요 시간: <span id="timer">0.0</span>초</h3>
+    </div>
+
+    <div id="gameArea" style="display:none;">
+        <textarea id="userInputDisplay" readonly placeholder="버튼을 누르면 행동이 순서대로 기록됩니다..."></textarea>
+        
+        <div class="btn-group" id="actionButtons"></div>
+
+        <div class="btn-group" style="margin-top: 20px; border-top: 1px solid #ccc; padding-top: 15px;">
+            <button onclick="submitSolution()" style="background: #00b894; width: 100%; font-size: 1.1rem; padding: 15px;">✅ 정답 제출하기 (Enter)</button>
+            <button class="danger-btn" onclick="resetInput()" style="width: 100%;">입력 초기화</button>
+        </div>
+    </div>
+
+    <div class="dashboard">
+        <h3>🏆 명예의 전당 (현재 문제)</h3>
+        <ul id="leaderboardList" style="list-style: none; padding: 0;">
+            <li>문제를 선택하면 기록이 표시됩니다.</li>
+        </ul>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, push, onValue, query, orderByChild } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    // 사용자가 제공한 Firebase 설정
+    const firebaseConfig = {
+        apiKey: "AIzaSyDP7WJoqi9hWXO27KaeY9Lvitj-5-E0j5Y",
+        authDomain: "bsar5-d7818.firebaseapp.com",
+        databaseURL: "https://bsar5-d7818-default-rtdb.firebaseio.com",
+        projectId: "bsar5-d7818",
+        storageBucket: "bsar5-d7818.firebasestorage.app",
+        messagingSenderId: "377629207721",
+        appId: "1:377629207721:web:8b893496c0ac1749890db8",
+        measurementId: "G-M9FJXYTS3F"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // 전역 변수로 할당하여 일반 script 태그에서 사용할 수 있게 함
+    window.db = db;
+    window.dbRef = ref;
+    window.dbPush = push;
+    window.dbOnValue = onValue;
+    window.dbQuery = query;
+    window.dbOrderByChild = orderByChild;
+</script>
+
+<script>
+    let problemDB = {};
+    let currentProblem = null;
+    let userInputSequence = [];
+    let startTime = 0;
+    let timerInterval = null;
+
+    // 1. problems.json 파일 불러오기
+    fetch('problems.json')
+        .then(response => response.json())
+        .then(data => {
+            problemDB = data;
+            updateProblemList();
+        })
+        .catch(error => {
+            console.error('Error loading JSON:', error);
+            alert("problems.json 파일을 불러오지 못했습니다. 파일이 같은 폴더에 있는지 확인해주세요.");
+        });
+
+    // 2. 문제 목록 업데이트
+    window.updateProblemList = function() {
+        const level = document.getElementById("levelSelect").value;
+        const pSelect = document.getElementById("problemSelect");
+        pSelect.innerHTML = "";
+        
+        if(problemDB[level]) {
+            problemDB[level].forEach((p, index) => {
+                const opt = document.createElement("option");
+                opt.value = index;
+                opt.innerText = p.title;
+                pSelect.appendChild(opt);
+            });
+        }
+    }
+
+    // 3. 문제 시작 셋팅
+    window.startProblem = function() {
+        const level = document.getElementById("levelSelect").value;
+        const pIndex = document.getElementById("problemSelect").value;
+        currentProblem = problemDB[level][pIndex];
+        
+        document.getElementById("problemArea").style.display = "block";
+        document.getElementById("gameArea").style.display = "block";
+        document.getElementById("problemTitle").innerText = currentProblem.title;
+        
+        let initialStateStr = "";
+        for(let key in currentProblem.jugs) {
+            initialStateStr += `[${key}물통: ${currentProblem.jugs[key].current}/${currentProblem.jugs[key].max}L] `;
+        }
+        document.getElementById("initialState").innerText = initialStateStr;
+        document.getElementById("missionText").innerText = `${currentProblem.goal.jug}물통에 정확히 ${currentProblem.goal.amount}L 의 물을 만드세요!`;
+        document.getElementById("maxMoves").innerText = currentProblem.maxMoves;
+        
+        resetInput();
+        generateActionButtons();
+        startTimer();
+        loadLeaderboard(); 
+    }
+
+    window.nextProblem = function() {
+        const pSelect = document.getElementById("problemSelect");
+        if(pSelect.selectedIndex < pSelect.options.length - 1) {
+            pSelect.selectedIndex += 1;
+            startProblem();
+        } else {
+            alert("이 난이도의 마지막 문제입니다!");
+        }
+    }
+
+    // 4. 동적 버튼 생성
+    function generateActionButtons() {
+        const btnArea = document.getElementById("actionButtons");
+        btnArea.innerHTML = "";
+        const jugs = Object.keys(currentProblem.jugs);
+
+        jugs.forEach(jug => {
+            btnArea.innerHTML += `<button onclick="addAction('FILL_${jug}', '${jug} 완전히 채우기')">${jug} 채우기</button>`;
+            btnArea.innerHTML += `<button class="danger-btn" onclick="addAction('EMPTY_${jug}', '${jug} 완전히 비우기')">${jug} 비우기</button>`;
+        });
+
+        jugs.forEach(fromJug => {
+            jugs.forEach(toJug => {
+                if(fromJug !== toJug) {
+                    btnArea.innerHTML += `<button class="move-btn" onclick="addAction('MOVE_${fromJug}_${toJug}', '${fromJug}에서 ${toJug}(으)로 최대한 옮기기')">${fromJug} ➔ ${toJug}</button>`;
+                }
+            });
+        });
+    }
+
+    // 5. 사용자 입력 처리
+    window.addAction = function(actionCode, displayWord) {
+        if(userInputSequence.length >= currentProblem.maxMoves) {
+            alert(`제한 횟수(${currentProblem.maxMoves}회)를 초과했습니다. 다시 시도하세요.`);
+            return;
+        }
+        userInputSequence.push({ code: actionCode, word: displayWord });
+        updateInputDisplay();
+    }
+
+    function updateInputDisplay() {
+        const displayArr = userInputSequence.map((act, index) => `${index + 1}. ${act.word}`);
+        document.getElementById("userInputDisplay").value = displayArr.join("\n");
+        document.getElementById("currentMoves").innerText = userInputSequence.length;
+    }
+
+    window.resetInput = function() {
+        userInputSequence = [];
+        updateInputDisplay();
+    }
+
+    // 6. 타이머
+    function startTimer() {
+        clearInterval(timerInterval);
+        startTime = Date.now();
+        timerInterval = setInterval(() => {
+            const elapsedTime = (Date.now() - startTime) / 1000;
+            document.getElementById("timer").innerText = elapsedTime.toFixed(1);
+        }, 100);
+    }
+
+    // 엔터키 제출
+    document.getElementById("userInputDisplay").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            submitSolution();
+        }
+    });
+
+    // 7. 채점 시뮬레이터 로직
+    window.submitSolution = function() {
+        if(!currentProblem) return;
+
+        // 가상 시뮬레이션을 위해 현재 상태 복사
+        let simJugs = JSON.parse(JSON.stringify(currentProblem.jugs));
+        
+        // 사용자가 입력한 순서대로 로직 실행
+        for(let action of userInputSequence) {
+            let parts = action.code.split('_');
+            let type = parts[0]; 
+            
+            if(type === 'FILL') {
+                simJugs[parts[1]].current = simJugs[parts[1]].max;
+            }
+            else if(type === 'EMPTY') {
+                simJugs[parts[1]].current = 0;
+            }
+            else if(type === 'MOVE') {
+                let from = parts[1], to = parts[2];
+                let moveAmount = Math.min(simJugs[from].current, simJugs[to].max - simJugs[to].current);
+                simJugs[from].current -= moveAmount;
+                simJugs[to].current += moveAmount;
+            }
+        }
+
+        // 결과 검증
+        if(simJugs[currentProblem.goal.jug].current === currentProblem.goal.amount) {
+            clearInterval(timerInterval);
+            const finalTime = ((Date.now() - startTime) / 1000).toFixed(1);
+            alert(`🎉 정답입니다! 소요 시간: ${finalTime}초`);
+            saveRecordToFirebase(finalTime);
+        } else {
+            alert("❌ 오답입니다. 제출하신 순서대로 수행해보았지만 목표 용량이 달성되지 않았습니다.");
+        }
+    }
+
+    // 8. Firebase 데이터베이스 저장 및 불러오기
+    function saveRecordToFirebase(time) {
+        let userName = prompt("축하합니다! 명예의 전당에 등록할 이름을 입력하세요:", "익명");
+        if(userName === null) return; 
+        if(userName.trim() === "") userName = "익명";
+
+        const recordRef = window.dbRef(window.db, 'waterjug_leaderboard/' + currentProblem.id);
+        window.dbPush(recordRef, {
+            name: userName,
+            time: parseFloat(time),
+            moves: userInputSequence.length,
+            timestamp: Date.now()
+        }).then(() => {
+            // 저장 성공 시 다음 문제로 넘어갈 수 있도록 상태 유지
+        }).catch(error => {
+            console.error("Firebase 저장 오류:", error);
+            alert("기록 저장 중 오류가 발생했습니다.");
+        });
+    }
+
+    function loadLeaderboard() {
+        const recordRef = window.dbRef(window.db, 'waterjug_leaderboard/' + currentProblem.id);
+        const topScores = window.dbQuery(recordRef, window.dbOrderByChild('time'));
+
+        window.dbOnValue(topScores, (snapshot) => {
+            const list = document.getElementById("leaderboardList");
+            list.innerHTML = "";
+            
+            if(snapshot.exists()) {
+                let rank = 1;
+                snapshot.forEach((childSnapshot) => {
+                    const data = childSnapshot.val();
+                    list.innerHTML += `<li class="leaderboard-item">
+                        <strong style="color:#e17055;">${rank}위: ${data.time}초</strong> | ${data.name} (이동 횟수: ${data.moves}회)
+                    </li>`;
+                    rank++;
+                });
+            } else {
+                list.innerHTML = "<li class='leaderboard-item'>아직 이 문제를 푼 사람이 없습니다. 첫 기록의 주인공이 되어보세요!</li>";
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

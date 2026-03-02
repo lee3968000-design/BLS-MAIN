@@ -1,0 +1,2602 @@
+{
+  "lvl1": [
+    {
+      "id": "lvl1_1",
+      "title": "문제 1번",
+      "jugs": {
+        "A": {
+          "max": 14,
+          "current": 0
+        },
+        "B": {
+          "max": 7,
+          "current": 0
+        },
+        "C": {
+          "max": 9,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 7
+      },
+      "maxMoves": 6
+    },
+    {
+      "id": "lvl1_2",
+      "title": "문제 2번",
+      "jugs": {
+        "A": {
+          "max": 11,
+          "current": 0
+        },
+        "B": {
+          "max": 3,
+          "current": 0
+        },
+        "C": {
+          "max": 12,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 3
+      },
+      "maxMoves": 6
+    },
+    {
+      "id": "lvl1_3",
+      "title": "문제 3번",
+      "jugs": {
+        "A": {
+          "max": 5,
+          "current": 0
+        },
+        "B": {
+          "max": 4,
+          "current": 0
+        },
+        "C": {
+          "max": 10,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 3
+      },
+      "maxMoves": 6
+    },
+    {
+      "id": "lvl1_4",
+      "title": "문제 4번",
+      "jugs": {
+        "A": {
+          "max": 13,
+          "current": 0
+        },
+        "B": {
+          "max": 9,
+          "current": 0
+        },
+        "C": {
+          "max": 8,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 5
+      },
+      "maxMoves": 4
+    },
+    {
+      "id": "lvl1_5",
+      "title": "문제 5번",
+      "jugs": {
+        "A": {
+          "max": 8,
+          "current": 0
+        },
+        "B": {
+          "max": 4,
+          "current": 0
+        },
+        "C": {
+          "max": 8,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 4
+      },
+      "maxMoves": 4
+    },
+    {
+      "id": "lvl1_6",
+      "title": "문제 6번",
+      "jugs": {
+        "A": {
+          "max": 3,
+          "current": 0
+        },
+        "B": {
+          "max": 13,
+          "current": 0
+        },
+        "C": {
+          "max": 15,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 10
+      },
+      "maxMoves": 7
+    },
+    {
+      "id": "lvl1_7",
+      "title": "문제 7번",
+      "jugs": {
+        "A": {
+          "max": 9,
+          "current": 0
+        },
+        "B": {
+          "max": 11,
+          "current": 0
+        },
+        "C": {
+          "max": 8,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 7
+      },
+      "maxMoves": 7
+    },
+    {
+      "id": "lvl1_8",
+      "title": "문제 8번",
+      "jugs": {
+        "A": {
+          "max": 5,
+          "current": 0
+        },
+        "B": {
+          "max": 8,
+          "current": 0
+        },
+        "C": {
+          "max": 13,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 3
+      },
+      "maxMoves": 4
+    },
+    {
+      "id": "lvl1_9",
+      "title": "문제 9번",
+      "jugs": {
+        "A": {
+          "max": 3,
+          "current": 0
+        },
+        "B": {
+          "max": 10,
+          "current": 0
+        },
+        "C": {
+          "max": 15,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 6
+      },
+      "maxMoves": 7
+    },
+    {
+      "id": "lvl1_10",
+      "title": "문제 10번",
+      "jugs": {
+        "A": {
+          "max": 5,
+          "current": 0
+        },
+        "B": {
+          "max": 6,
+          "current": 0
+        },
+        "C": {
+          "max": 14,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 4
+      },
+      "maxMoves": 5
+    },
+    {
+      "id": "lvl1_11",
+      "title": "문제 11번",
+      "jugs": {
+        "A": {
+          "max": 12,
+          "current": 0
+        },
+        "B": {
+          "max": 12,
+          "current": 0
+        },
+        "C": {
+          "max": 10,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 12
+      },
+      "maxMoves": 6
+    },
+    {
+      "id": "lvl1_12",
+      "title": "문제 12번",
+      "jugs": {
+        "A": {
+          "max": 12,
+          "current": 0
+        },
+        "B": {
+          "max": 7,
+          "current": 0
+        },
+        "C": {
+          "max": 12,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "A",
+        "amount": 5
+      },
+      "maxMoves": 4
+    },
+    {
+      "id": "lvl1_13",
+      "title": "문제 13번",
+      "jugs": {
+        "A": {
+          "max": 6,
+          "current": 0
+        },
+        "B": {
+          "max": 13,
+          "current": 0
+        },
+        "C": {
+          "max": 8,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "A",
+        "amount": 2
+      },
+      "maxMoves": 4
+    },
+    {
+      "id": "lvl1_14",
+      "title": "문제 14번",
+      "jugs": {
+        "A": {
+          "max": 7,
+          "current": 0
+        },
+        "B": {
+          "max": 12,
+          "current": 0
+        },
+        "C": {
+          "max": 10,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 9
+      },
+      "maxMoves": 5
+    },
+    {
+      "id": "lvl1_15",
+      "title": "문제 15번",
+      "jugs": {
+        "A": {
+          "max": 8,
+          "current": 0
+        },
+        "B": {
+          "max": 15,
+          "current": 0
+        },
+        "C": {
+          "max": 10,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 7
+      },
+      "maxMoves": 4
+    },
+    {
+      "id": "lvl1_16",
+      "title": "문제 16번",
+      "jugs": {
+        "A": {
+          "max": 15,
+          "current": 0
+        },
+        "B": {
+          "max": 10,
+          "current": 0
+        },
+        "C": {
+          "max": 9,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "A",
+        "amount": 9
+      },
+      "maxMoves": 7
+    },
+    {
+      "id": "lvl1_17",
+      "title": "문제 17번",
+      "jugs": {
+        "A": {
+          "max": 11,
+          "current": 0
+        },
+        "B": {
+          "max": 4,
+          "current": 0
+        },
+        "C": {
+          "max": 9,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 4
+      },
+      "maxMoves": 5
+    },
+    {
+      "id": "lvl1_18",
+      "title": "문제 18번",
+      "jugs": {
+        "A": {
+          "max": 9,
+          "current": 0
+        },
+        "B": {
+          "max": 3,
+          "current": 0
+        },
+        "C": {
+          "max": 5,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 3
+      },
+      "maxMoves": 4
+    },
+    {
+      "id": "lvl1_19",
+      "title": "문제 19번",
+      "jugs": {
+        "A": {
+          "max": 4,
+          "current": 0
+        },
+        "B": {
+          "max": 13,
+          "current": 0
+        },
+        "C": {
+          "max": 3,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 2
+      },
+      "maxMoves": 7
+    },
+    {
+      "id": "lvl1_20",
+      "title": "문제 20번",
+      "jugs": {
+        "A": {
+          "max": 8,
+          "current": 0
+        },
+        "B": {
+          "max": 12,
+          "current": 0
+        },
+        "C": {
+          "max": 10,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 10
+      },
+      "maxMoves": 4
+    },
+    {
+      "id": "lvl1_21",
+      "title": "문제 21번",
+      "jugs": {
+        "A": {
+          "max": 10,
+          "current": 0
+        },
+        "B": {
+          "max": 4,
+          "current": 0
+        },
+        "C": {
+          "max": 14,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 10
+      },
+      "maxMoves": 6
+    },
+    {
+      "id": "lvl1_22",
+      "title": "문제 22번",
+      "jugs": {
+        "A": {
+          "max": 14,
+          "current": 0
+        },
+        "B": {
+          "max": 9,
+          "current": 0
+        },
+        "C": {
+          "max": 13,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 5
+      },
+      "maxMoves": 7
+    },
+    {
+      "id": "lvl1_23",
+      "title": "문제 23번",
+      "jugs": {
+        "A": {
+          "max": 9,
+          "current": 0
+        },
+        "B": {
+          "max": 14,
+          "current": 0
+        },
+        "C": {
+          "max": 8,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "A",
+        "amount": 9
+      },
+      "maxMoves": 4
+    },
+    {
+      "id": "lvl1_24",
+      "title": "문제 24번",
+      "jugs": {
+        "A": {
+          "max": 9,
+          "current": 0
+        },
+        "B": {
+          "max": 10,
+          "current": 0
+        },
+        "C": {
+          "max": 12,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 10
+      },
+      "maxMoves": 5
+    },
+    {
+      "id": "lvl1_25",
+      "title": "문제 25번",
+      "jugs": {
+        "A": {
+          "max": 6,
+          "current": 0
+        },
+        "B": {
+          "max": 8,
+          "current": 0
+        },
+        "C": {
+          "max": 8,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 6
+      },
+      "maxMoves": 5
+    }
+  ],
+  "lvl2": [
+    {
+      "id": "lvl2_1",
+      "title": "문제 1번",
+      "jugs": {
+        "A": {
+          "max": 4,
+          "current": 0
+        },
+        "B": {
+          "max": 11,
+          "current": 0
+        },
+        "C": {
+          "max": 11,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 2
+      },
+      "maxMoves": 12
+    },
+    {
+      "id": "lvl2_2",
+      "title": "문제 2번",
+      "jugs": {
+        "A": {
+          "max": 10,
+          "current": 6
+        },
+        "B": {
+          "max": 12,
+          "current": 0
+        },
+        "C": {
+          "max": 5,
+          "current": 2
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 3
+      },
+      "maxMoves": 10
+    },
+    {
+      "id": "lvl2_3",
+      "title": "문제 3번",
+      "jugs": {
+        "A": {
+          "max": 5,
+          "current": 4
+        },
+        "B": {
+          "max": 12,
+          "current": 0
+        },
+        "C": {
+          "max": 6,
+          "current": 1
+        },
+        "D": {
+          "max": 12,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "A",
+        "amount": 5
+      },
+      "maxMoves": 10
+    },
+    {
+      "id": "lvl2_4",
+      "title": "문제 4번",
+      "jugs": {
+        "A": {
+          "max": 10,
+          "current": 4
+        },
+        "B": {
+          "max": 5,
+          "current": 0
+        },
+        "C": {
+          "max": 9,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 6
+      },
+      "maxMoves": 11
+    },
+    {
+      "id": "lvl2_5",
+      "title": "문제 5번",
+      "jugs": {
+        "A": {
+          "max": 5,
+          "current": 1
+        },
+        "B": {
+          "max": 14,
+          "current": 6
+        },
+        "C": {
+          "max": 9,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 6
+      },
+      "maxMoves": 11
+    },
+    {
+      "id": "lvl2_6",
+      "title": "문제 6번",
+      "jugs": {
+        "A": {
+          "max": 13,
+          "current": 2
+        },
+        "B": {
+          "max": 6,
+          "current": 0
+        },
+        "C": {
+          "max": 14,
+          "current": 13
+        }
+      },
+      "goal": {
+        "jug": "A",
+        "amount": 4
+      },
+      "maxMoves": 8
+    },
+    {
+      "id": "lvl2_7",
+      "title": "문제 7번",
+      "jugs": {
+        "A": {
+          "max": 15,
+          "current": 0
+        },
+        "B": {
+          "max": 4,
+          "current": 0
+        },
+        "C": {
+          "max": 6,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "A",
+        "amount": 7
+      },
+      "maxMoves": 10
+    },
+    {
+      "id": "lvl2_8",
+      "title": "문제 8번",
+      "jugs": {
+        "A": {
+          "max": 7,
+          "current": 3
+        },
+        "B": {
+          "max": 14,
+          "current": 0
+        },
+        "C": {
+          "max": 14,
+          "current": 13
+        },
+        "D": {
+          "max": 8,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "A",
+        "amount": 2
+      },
+      "maxMoves": 9
+    },
+    {
+      "id": "lvl2_9",
+      "title": "문제 9번",
+      "jugs": {
+        "A": {
+          "max": 9,
+          "current": 0
+        },
+        "B": {
+          "max": 14,
+          "current": 0
+        },
+        "C": {
+          "max": 9,
+          "current": 6
+        }
+      },
+      "goal": {
+        "jug": "A",
+        "amount": 9
+      },
+      "maxMoves": 12
+    },
+    {
+      "id": "lvl2_10",
+      "title": "문제 10번",
+      "jugs": {
+        "A": {
+          "max": 15,
+          "current": 10
+        },
+        "B": {
+          "max": 14,
+          "current": 4
+        },
+        "C": {
+          "max": 15,
+          "current": 0
+        },
+        "D": {
+          "max": 12,
+          "current": 11
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 6
+      },
+      "maxMoves": 10
+    },
+    {
+      "id": "lvl2_11",
+      "title": "문제 11번",
+      "jugs": {
+        "A": {
+          "max": 15,
+          "current": 0
+        },
+        "B": {
+          "max": 12,
+          "current": 1
+        },
+        "C": {
+          "max": 13,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 13
+      },
+      "maxMoves": 9
+    },
+    {
+      "id": "lvl2_12",
+      "title": "문제 12번",
+      "jugs": {
+        "A": {
+          "max": 11,
+          "current": 0
+        },
+        "B": {
+          "max": 14,
+          "current": 6
+        },
+        "C": {
+          "max": 15,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 8
+      },
+      "maxMoves": 10
+    },
+    {
+      "id": "lvl2_13",
+      "title": "문제 13번",
+      "jugs": {
+        "A": {
+          "max": 11,
+          "current": 9
+        },
+        "B": {
+          "max": 12,
+          "current": 4
+        },
+        "C": {
+          "max": 13,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 13
+      },
+      "maxMoves": 12
+    },
+    {
+      "id": "lvl2_14",
+      "title": "문제 14번",
+      "jugs": {
+        "A": {
+          "max": 3,
+          "current": 0
+        },
+        "B": {
+          "max": 12,
+          "current": 0
+        },
+        "C": {
+          "max": 11,
+          "current": 1
+        },
+        "D": {
+          "max": 3,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 8
+      },
+      "maxMoves": 9
+    },
+    {
+      "id": "lvl2_15",
+      "title": "문제 15번",
+      "jugs": {
+        "A": {
+          "max": 4,
+          "current": 0
+        },
+        "B": {
+          "max": 5,
+          "current": 0
+        },
+        "C": {
+          "max": 14,
+          "current": 0
+        },
+        "D": {
+          "max": 9,
+          "current": 6
+        }
+      },
+      "goal": {
+        "jug": "D",
+        "amount": 7
+      },
+      "maxMoves": 11
+    },
+    {
+      "id": "lvl2_16",
+      "title": "문제 16번",
+      "jugs": {
+        "A": {
+          "max": 9,
+          "current": 0
+        },
+        "B": {
+          "max": 14,
+          "current": 5
+        },
+        "C": {
+          "max": 14,
+          "current": 8
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 8
+      },
+      "maxMoves": 9
+    },
+    {
+      "id": "lvl2_17",
+      "title": "문제 17번",
+      "jugs": {
+        "A": {
+          "max": 10,
+          "current": 1
+        },
+        "B": {
+          "max": 6,
+          "current": 0
+        },
+        "C": {
+          "max": 15,
+          "current": 6
+        }
+      },
+      "goal": {
+        "jug": "A",
+        "amount": 9
+      },
+      "maxMoves": 11
+    },
+    {
+      "id": "lvl2_18",
+      "title": "문제 18번",
+      "jugs": {
+        "A": {
+          "max": 15,
+          "current": 6
+        },
+        "B": {
+          "max": 7,
+          "current": 1
+        },
+        "C": {
+          "max": 7,
+          "current": 6
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 5
+      },
+      "maxMoves": 11
+    },
+    {
+      "id": "lvl2_19",
+      "title": "문제 19번",
+      "jugs": {
+        "A": {
+          "max": 6,
+          "current": 1
+        },
+        "B": {
+          "max": 12,
+          "current": 9
+        },
+        "C": {
+          "max": 11,
+          "current": 0
+        },
+        "D": {
+          "max": 6,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 10
+      },
+      "maxMoves": 8
+    },
+    {
+      "id": "lvl2_20",
+      "title": "문제 20번",
+      "jugs": {
+        "A": {
+          "max": 5,
+          "current": 4
+        },
+        "B": {
+          "max": 5,
+          "current": 0
+        },
+        "C": {
+          "max": 9,
+          "current": 0
+        },
+        "D": {
+          "max": 9,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "A",
+        "amount": 3
+      },
+      "maxMoves": 10
+    },
+    {
+      "id": "lvl2_21",
+      "title": "문제 21번",
+      "jugs": {
+        "A": {
+          "max": 5,
+          "current": 0
+        },
+        "B": {
+          "max": 13,
+          "current": 10
+        },
+        "C": {
+          "max": 12,
+          "current": 10
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 6
+      },
+      "maxMoves": 11
+    },
+    {
+      "id": "lvl2_22",
+      "title": "문제 22번",
+      "jugs": {
+        "A": {
+          "max": 11,
+          "current": 0
+        },
+        "B": {
+          "max": 7,
+          "current": 5
+        },
+        "C": {
+          "max": 6,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 7
+      },
+      "maxMoves": 8
+    },
+    {
+      "id": "lvl2_23",
+      "title": "문제 23번",
+      "jugs": {
+        "A": {
+          "max": 9,
+          "current": 2
+        },
+        "B": {
+          "max": 14,
+          "current": 0
+        },
+        "C": {
+          "max": 14,
+          "current": 13
+        },
+        "D": {
+          "max": 5,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 10
+      },
+      "maxMoves": 11
+    },
+    {
+      "id": "lvl2_24",
+      "title": "문제 24번",
+      "jugs": {
+        "A": {
+          "max": 3,
+          "current": 0
+        },
+        "B": {
+          "max": 14,
+          "current": 0
+        },
+        "C": {
+          "max": 14,
+          "current": 12
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 1
+      },
+      "maxMoves": 10
+    },
+    {
+      "id": "lvl2_25",
+      "title": "문제 25번",
+      "jugs": {
+        "A": {
+          "max": 14,
+          "current": 0
+        },
+        "B": {
+          "max": 8,
+          "current": 0
+        },
+        "C": {
+          "max": 13,
+          "current": 3
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 8
+      },
+      "maxMoves": 8
+    }
+  ],
+  "lvl3": [
+    {
+      "id": "lvl3_1",
+      "title": "문제 1번",
+      "jugs": {
+        "A": {
+          "max": 11,
+          "current": 0
+        },
+        "B": {
+          "max": 4,
+          "current": 0
+        },
+        "C": {
+          "max": 14,
+          "current": 0
+        },
+        "D": {
+          "max": 5,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 4
+      },
+      "maxMoves": 7
+    },
+    {
+      "id": "lvl3_2",
+      "title": "문제 2번",
+      "jugs": {
+        "A": {
+          "max": 8,
+          "current": 0
+        },
+        "B": {
+          "max": 7,
+          "current": 0
+        },
+        "C": {
+          "max": 13,
+          "current": 0
+        },
+        "D": {
+          "max": 12,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "D",
+        "amount": 6
+      },
+      "maxMoves": 8
+    },
+    {
+      "id": "lvl3_3",
+      "title": "문제 3번",
+      "jugs": {
+        "A": {
+          "max": 10,
+          "current": 0
+        },
+        "B": {
+          "max": 9,
+          "current": 0
+        },
+        "C": {
+          "max": 4,
+          "current": 0
+        },
+        "D": {
+          "max": 14,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "D",
+        "amount": 5
+      },
+      "maxMoves": 6
+    },
+    {
+      "id": "lvl3_4",
+      "title": "문제 4번",
+      "jugs": {
+        "A": {
+          "max": 10,
+          "current": 0
+        },
+        "B": {
+          "max": 10,
+          "current": 0
+        },
+        "C": {
+          "max": 15,
+          "current": 0
+        },
+        "D": {
+          "max": 7,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "D",
+        "amount": 3
+      },
+      "maxMoves": 8
+    },
+    {
+      "id": "lvl3_5",
+      "title": "문제 5번",
+      "jugs": {
+        "A": {
+          "max": 9,
+          "current": 0
+        },
+        "B": {
+          "max": 8,
+          "current": 0
+        },
+        "C": {
+          "max": 8,
+          "current": 0
+        },
+        "D": {
+          "max": 15,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 7
+      },
+      "maxMoves": 6
+    },
+    {
+      "id": "lvl3_6",
+      "title": "문제 6번",
+      "jugs": {
+        "A": {
+          "max": 14,
+          "current": 0
+        },
+        "B": {
+          "max": 3,
+          "current": 0
+        },
+        "C": {
+          "max": 4,
+          "current": 0
+        },
+        "D": {
+          "max": 11,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 2
+      },
+      "maxMoves": 8
+    },
+    {
+      "id": "lvl3_7",
+      "title": "문제 7번",
+      "jugs": {
+        "A": {
+          "max": 12,
+          "current": 0
+        },
+        "B": {
+          "max": 10,
+          "current": 0
+        },
+        "C": {
+          "max": 13,
+          "current": 0
+        },
+        "D": {
+          "max": 4,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "A",
+        "amount": 6
+      },
+      "maxMoves": 6
+    },
+    {
+      "id": "lvl3_8",
+      "title": "문제 8번",
+      "jugs": {
+        "A": {
+          "max": 9,
+          "current": 0
+        },
+        "B": {
+          "max": 13,
+          "current": 0
+        },
+        "C": {
+          "max": 7,
+          "current": 0
+        },
+        "D": {
+          "max": 13,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "D",
+        "amount": 9
+      },
+      "maxMoves": 6
+    },
+    {
+      "id": "lvl3_9",
+      "title": "문제 9번",
+      "jugs": {
+        "A": {
+          "max": 13,
+          "current": 0
+        },
+        "B": {
+          "max": 14,
+          "current": 0
+        },
+        "C": {
+          "max": 11,
+          "current": 0
+        },
+        "D": {
+          "max": 3,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 10
+      },
+      "maxMoves": 5
+    },
+    {
+      "id": "lvl3_10",
+      "title": "문제 10번",
+      "jugs": {
+        "A": {
+          "max": 3,
+          "current": 0
+        },
+        "B": {
+          "max": 10,
+          "current": 0
+        },
+        "C": {
+          "max": 4,
+          "current": 0
+        },
+        "D": {
+          "max": 12,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 3
+      },
+      "maxMoves": 6
+    },
+    {
+      "id": "lvl3_11",
+      "title": "문제 11번",
+      "jugs": {
+        "A": {
+          "max": 9,
+          "current": 0
+        },
+        "B": {
+          "max": 3,
+          "current": 0
+        },
+        "C": {
+          "max": 4,
+          "current": 0
+        },
+        "D": {
+          "max": 15,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "A",
+        "amount": 5
+      },
+      "maxMoves": 5
+    },
+    {
+      "id": "lvl3_12",
+      "title": "문제 12번",
+      "jugs": {
+        "A": {
+          "max": 7,
+          "current": 0
+        },
+        "B": {
+          "max": 5,
+          "current": 0
+        },
+        "C": {
+          "max": 6,
+          "current": 0
+        },
+        "D": {
+          "max": 5,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "D",
+        "amount": 3
+      },
+      "maxMoves": 6
+    },
+    {
+      "id": "lvl3_13",
+      "title": "문제 13번",
+      "jugs": {
+        "A": {
+          "max": 12,
+          "current": 0
+        },
+        "B": {
+          "max": 3,
+          "current": 0
+        },
+        "C": {
+          "max": 5,
+          "current": 0
+        },
+        "D": {
+          "max": 11,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 1
+      },
+      "maxMoves": 8
+    },
+    {
+      "id": "lvl3_14",
+      "title": "문제 14번",
+      "jugs": {
+        "A": {
+          "max": 12,
+          "current": 0
+        },
+        "B": {
+          "max": 8,
+          "current": 0
+        },
+        "C": {
+          "max": 13,
+          "current": 0
+        },
+        "D": {
+          "max": 9,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "D",
+        "amount": 5
+      },
+      "maxMoves": 8
+    },
+    {
+      "id": "lvl3_15",
+      "title": "문제 15번",
+      "jugs": {
+        "A": {
+          "max": 12,
+          "current": 0
+        },
+        "B": {
+          "max": 11,
+          "current": 0
+        },
+        "C": {
+          "max": 14,
+          "current": 0
+        },
+        "D": {
+          "max": 15,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 11
+      },
+      "maxMoves": 8
+    },
+    {
+      "id": "lvl3_16",
+      "title": "문제 16번",
+      "jugs": {
+        "A": {
+          "max": 11,
+          "current": 0
+        },
+        "B": {
+          "max": 14,
+          "current": 0
+        },
+        "C": {
+          "max": 5,
+          "current": 0
+        },
+        "D": {
+          "max": 15,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 11
+      },
+      "maxMoves": 7
+    },
+    {
+      "id": "lvl3_17",
+      "title": "문제 17번",
+      "jugs": {
+        "A": {
+          "max": 3,
+          "current": 0
+        },
+        "B": {
+          "max": 12,
+          "current": 0
+        },
+        "C": {
+          "max": 15,
+          "current": 0
+        },
+        "D": {
+          "max": 12,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "A",
+        "amount": 3
+      },
+      "maxMoves": 7
+    },
+    {
+      "id": "lvl3_18",
+      "title": "문제 18번",
+      "jugs": {
+        "A": {
+          "max": 12,
+          "current": 0
+        },
+        "B": {
+          "max": 15,
+          "current": 0
+        },
+        "C": {
+          "max": 4,
+          "current": 0
+        },
+        "D": {
+          "max": 11,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 3
+      },
+      "maxMoves": 9
+    },
+    {
+      "id": "lvl3_19",
+      "title": "문제 19번",
+      "jugs": {
+        "A": {
+          "max": 3,
+          "current": 0
+        },
+        "B": {
+          "max": 15,
+          "current": 0
+        },
+        "C": {
+          "max": 9,
+          "current": 0
+        },
+        "D": {
+          "max": 7,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 7
+      },
+      "maxMoves": 5
+    },
+    {
+      "id": "lvl3_20",
+      "title": "문제 20번",
+      "jugs": {
+        "A": {
+          "max": 5,
+          "current": 0
+        },
+        "B": {
+          "max": 6,
+          "current": 0
+        },
+        "C": {
+          "max": 3,
+          "current": 0
+        },
+        "D": {
+          "max": 9,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "A",
+        "amount": 4
+      },
+      "maxMoves": 8
+    },
+    {
+      "id": "lvl3_21",
+      "title": "문제 21번",
+      "jugs": {
+        "A": {
+          "max": 6,
+          "current": 0
+        },
+        "B": {
+          "max": 4,
+          "current": 0
+        },
+        "C": {
+          "max": 5,
+          "current": 0
+        },
+        "D": {
+          "max": 11,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "A",
+        "amount": 4
+      },
+      "maxMoves": 9
+    },
+    {
+      "id": "lvl3_22",
+      "title": "문제 22번",
+      "jugs": {
+        "A": {
+          "max": 13,
+          "current": 0
+        },
+        "B": {
+          "max": 11,
+          "current": 0
+        },
+        "C": {
+          "max": 7,
+          "current": 0
+        },
+        "D": {
+          "max": 15,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 2
+      },
+      "maxMoves": 7
+    },
+    {
+      "id": "lvl3_23",
+      "title": "문제 23번",
+      "jugs": {
+        "A": {
+          "max": 7,
+          "current": 0
+        },
+        "B": {
+          "max": 4,
+          "current": 0
+        },
+        "C": {
+          "max": 15,
+          "current": 0
+        },
+        "D": {
+          "max": 10,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "D",
+        "amount": 7
+      },
+      "maxMoves": 7
+    },
+    {
+      "id": "lvl3_24",
+      "title": "문제 24번",
+      "jugs": {
+        "A": {
+          "max": 6,
+          "current": 0
+        },
+        "B": {
+          "max": 14,
+          "current": 0
+        },
+        "C": {
+          "max": 8,
+          "current": 0
+        },
+        "D": {
+          "max": 14,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "A",
+        "amount": 2
+      },
+      "maxMoves": 5
+    },
+    {
+      "id": "lvl3_25",
+      "title": "문제 25번",
+      "jugs": {
+        "A": {
+          "max": 11,
+          "current": 0
+        },
+        "B": {
+          "max": 10,
+          "current": 0
+        },
+        "C": {
+          "max": 7,
+          "current": 0
+        },
+        "D": {
+          "max": 10,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 1
+      },
+      "maxMoves": 9
+    }
+  ],
+  "lvl4": [
+    {
+      "id": "lvl4_1",
+      "title": "문제 1번",
+      "jugs": {
+        "A": {
+          "max": 13,
+          "current": 0
+        },
+        "B": {
+          "max": 14,
+          "current": 0
+        },
+        "C": {
+          "max": 14,
+          "current": 13
+        },
+        "D": {
+          "max": 9,
+          "current": 8
+        },
+        "E": {
+          "max": 8,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 7
+      },
+      "maxMoves": 12
+    },
+    {
+      "id": "lvl4_2",
+      "title": "문제 2번",
+      "jugs": {
+        "A": {
+          "max": 8,
+          "current": 0
+        },
+        "B": {
+          "max": 10,
+          "current": 5
+        },
+        "C": {
+          "max": 8,
+          "current": 6
+        },
+        "D": {
+          "max": 8,
+          "current": 3
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 10
+      },
+      "maxMoves": 11
+    },
+    {
+      "id": "lvl4_3",
+      "title": "문제 3번",
+      "jugs": {
+        "A": {
+          "max": 3,
+          "current": 0
+        },
+        "B": {
+          "max": 4,
+          "current": 0
+        },
+        "C": {
+          "max": 11,
+          "current": 0
+        },
+        "D": {
+          "max": 10,
+          "current": 0
+        },
+        "E": {
+          "max": 3,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "A",
+        "amount": 2
+      },
+      "maxMoves": 13
+    },
+    {
+      "id": "lvl4_4",
+      "title": "문제 4번",
+      "jugs": {
+        "A": {
+          "max": 4,
+          "current": 0
+        },
+        "B": {
+          "max": 4,
+          "current": 1
+        },
+        "C": {
+          "max": 4,
+          "current": 0
+        },
+        "D": {
+          "max": 10,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "D",
+        "amount": 10
+      },
+      "maxMoves": 14
+    },
+    {
+      "id": "lvl4_5",
+      "title": "문제 5번",
+      "jugs": {
+        "A": {
+          "max": 10,
+          "current": 0
+        },
+        "B": {
+          "max": 4,
+          "current": 0
+        },
+        "C": {
+          "max": 15,
+          "current": 12
+        },
+        "D": {
+          "max": 12,
+          "current": 8
+        },
+        "E": {
+          "max": 12,
+          "current": 11
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 3
+      },
+      "maxMoves": 12
+    },
+    {
+      "id": "lvl4_6",
+      "title": "문제 6번",
+      "jugs": {
+        "A": {
+          "max": 13,
+          "current": 2
+        },
+        "B": {
+          "max": 9,
+          "current": 5
+        },
+        "C": {
+          "max": 11,
+          "current": 0
+        },
+        "D": {
+          "max": 6,
+          "current": 0
+        },
+        "E": {
+          "max": 7,
+          "current": 2
+        }
+      },
+      "goal": {
+        "jug": "D",
+        "amount": 6
+      },
+      "maxMoves": 10
+    },
+    {
+      "id": "lvl4_7",
+      "title": "문제 7번",
+      "jugs": {
+        "A": {
+          "max": 9,
+          "current": 0
+        },
+        "B": {
+          "max": 4,
+          "current": 1
+        },
+        "C": {
+          "max": 15,
+          "current": 14
+        },
+        "D": {
+          "max": 4,
+          "current": 1
+        },
+        "E": {
+          "max": 3,
+          "current": 1
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 2
+      },
+      "maxMoves": 10
+    },
+    {
+      "id": "lvl4_8",
+      "title": "문제 8번",
+      "jugs": {
+        "A": {
+          "max": 8,
+          "current": 0
+        },
+        "B": {
+          "max": 15,
+          "current": 0
+        },
+        "C": {
+          "max": 7,
+          "current": 0
+        },
+        "D": {
+          "max": 14,
+          "current": 6
+        }
+      },
+      "goal": {
+        "jug": "D",
+        "amount": 13
+      },
+      "maxMoves": 11
+    },
+    {
+      "id": "lvl4_9",
+      "title": "문제 9번",
+      "jugs": {
+        "A": {
+          "max": 8,
+          "current": 0
+        },
+        "B": {
+          "max": 14,
+          "current": 0
+        },
+        "C": {
+          "max": 15,
+          "current": 0
+        },
+        "D": {
+          "max": 5,
+          "current": 2
+        },
+        "E": {
+          "max": 13,
+          "current": 11
+        }
+      },
+      "goal": {
+        "jug": "E",
+        "amount": 12
+      },
+      "maxMoves": 11
+    },
+    {
+      "id": "lvl4_10",
+      "title": "문제 10번",
+      "jugs": {
+        "A": {
+          "max": 15,
+          "current": 10
+        },
+        "B": {
+          "max": 13,
+          "current": 9
+        },
+        "C": {
+          "max": 6,
+          "current": 0
+        },
+        "D": {
+          "max": 5,
+          "current": 0
+        },
+        "E": {
+          "max": 11,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 2
+      },
+      "maxMoves": 10
+    },
+    {
+      "id": "lvl4_11",
+      "title": "문제 11번",
+      "jugs": {
+        "A": {
+          "max": 4,
+          "current": 0
+        },
+        "B": {
+          "max": 11,
+          "current": 0
+        },
+        "C": {
+          "max": 4,
+          "current": 2
+        },
+        "D": {
+          "max": 6,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 3
+      },
+      "maxMoves": 10
+    },
+    {
+      "id": "lvl4_12",
+      "title": "문제 12번",
+      "jugs": {
+        "A": {
+          "max": 4,
+          "current": 0
+        },
+        "B": {
+          "max": 4,
+          "current": 0
+        },
+        "C": {
+          "max": 13,
+          "current": 0
+        },
+        "D": {
+          "max": 15,
+          "current": 0
+        },
+        "E": {
+          "max": 9,
+          "current": 4
+        }
+      },
+      "goal": {
+        "jug": "A",
+        "amount": 2
+      },
+      "maxMoves": 13
+    },
+    {
+      "id": "lvl4_13",
+      "title": "문제 13번",
+      "jugs": {
+        "A": {
+          "max": 8,
+          "current": 0
+        },
+        "B": {
+          "max": 6,
+          "current": 3
+        },
+        "C": {
+          "max": 6,
+          "current": 2
+        },
+        "D": {
+          "max": 5,
+          "current": 2
+        },
+        "E": {
+          "max": 9,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "D",
+        "amount": 4
+      },
+      "maxMoves": 11
+    },
+    {
+      "id": "lvl4_14",
+      "title": "문제 14번",
+      "jugs": {
+        "A": {
+          "max": 9,
+          "current": 0
+        },
+        "B": {
+          "max": 9,
+          "current": 5
+        },
+        "C": {
+          "max": 13,
+          "current": 0
+        },
+        "D": {
+          "max": 13,
+          "current": 9
+        },
+        "E": {
+          "max": 4,
+          "current": 1
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 12
+      },
+      "maxMoves": 14
+    },
+    {
+      "id": "lvl4_15",
+      "title": "문제 15번",
+      "jugs": {
+        "A": {
+          "max": 11,
+          "current": 5
+        },
+        "B": {
+          "max": 15,
+          "current": 6
+        },
+        "C": {
+          "max": 8,
+          "current": 0
+        },
+        "D": {
+          "max": 8,
+          "current": 1
+        }
+      },
+      "goal": {
+        "jug": "D",
+        "amount": 5
+      },
+      "maxMoves": 10
+    },
+    {
+      "id": "lvl4_16",
+      "title": "문제 16번",
+      "jugs": {
+        "A": {
+          "max": 4,
+          "current": 0
+        },
+        "B": {
+          "max": 13,
+          "current": 0
+        },
+        "C": {
+          "max": 9,
+          "current": 1
+        },
+        "D": {
+          "max": 12,
+          "current": 0
+        },
+        "E": {
+          "max": 13,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "D",
+        "amount": 11
+      },
+      "maxMoves": 15
+    },
+    {
+      "id": "lvl4_17",
+      "title": "문제 17번",
+      "jugs": {
+        "A": {
+          "max": 6,
+          "current": 0
+        },
+        "B": {
+          "max": 8,
+          "current": 1
+        },
+        "C": {
+          "max": 14,
+          "current": 13
+        },
+        "D": {
+          "max": 9,
+          "current": 0
+        },
+        "E": {
+          "max": 4,
+          "current": 1
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 12
+      },
+      "maxMoves": 10
+    },
+    {
+      "id": "lvl4_18",
+      "title": "문제 18번",
+      "jugs": {
+        "A": {
+          "max": 15,
+          "current": 2
+        },
+        "B": {
+          "max": 6,
+          "current": 0
+        },
+        "C": {
+          "max": 6,
+          "current": 0
+        },
+        "D": {
+          "max": 11,
+          "current": 4
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 2
+      },
+      "maxMoves": 12
+    },
+    {
+      "id": "lvl4_19",
+      "title": "문제 19번",
+      "jugs": {
+        "A": {
+          "max": 14,
+          "current": 0
+        },
+        "B": {
+          "max": 6,
+          "current": 4
+        },
+        "C": {
+          "max": 9,
+          "current": 0
+        },
+        "D": {
+          "max": 12,
+          "current": 5
+        },
+        "E": {
+          "max": 15,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 6
+      },
+      "maxMoves": 10
+    },
+    {
+      "id": "lvl4_20",
+      "title": "문제 20번",
+      "jugs": {
+        "A": {
+          "max": 3,
+          "current": 1
+        },
+        "B": {
+          "max": 4,
+          "current": 3
+        },
+        "C": {
+          "max": 4,
+          "current": 0
+        },
+        "D": {
+          "max": 13,
+          "current": 0
+        },
+        "E": {
+          "max": 12,
+          "current": 7
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 2
+      },
+      "maxMoves": 10
+    },
+    {
+      "id": "lvl4_21",
+      "title": "문제 21번",
+      "jugs": {
+        "A": {
+          "max": 3,
+          "current": 0
+        },
+        "B": {
+          "max": 15,
+          "current": 12
+        },
+        "C": {
+          "max": 11,
+          "current": 0
+        },
+        "D": {
+          "max": 15,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "D",
+        "amount": 13
+      },
+      "maxMoves": 14
+    },
+    {
+      "id": "lvl4_22",
+      "title": "문제 22번",
+      "jugs": {
+        "A": {
+          "max": 15,
+          "current": 0
+        },
+        "B": {
+          "max": 14,
+          "current": 2
+        },
+        "C": {
+          "max": 14,
+          "current": 0
+        },
+        "D": {
+          "max": 13,
+          "current": 8
+        }
+      },
+      "goal": {
+        "jug": "C",
+        "amount": 6
+      },
+      "maxMoves": 14
+    },
+    {
+      "id": "lvl4_23",
+      "title": "문제 23번",
+      "jugs": {
+        "A": {
+          "max": 10,
+          "current": 0
+        },
+        "B": {
+          "max": 8,
+          "current": 0
+        },
+        "C": {
+          "max": 8,
+          "current": 0
+        },
+        "D": {
+          "max": 5,
+          "current": 2
+        }
+      },
+      "goal": {
+        "jug": "B",
+        "amount": 2
+      },
+      "maxMoves": 11
+    },
+    {
+      "id": "lvl4_24",
+      "title": "문제 24번",
+      "jugs": {
+        "A": {
+          "max": 7,
+          "current": 0
+        },
+        "B": {
+          "max": 7,
+          "current": 0
+        },
+        "C": {
+          "max": 11,
+          "current": 0
+        },
+        "D": {
+          "max": 9,
+          "current": 0
+        }
+      },
+      "goal": {
+        "jug": "A",
+        "amount": 6
+      },
+      "maxMoves": 11
+    },
+    {
+      "id": "lvl4_25",
+      "title": "문제 25번",
+      "jugs": {
+        "A": {
+          "max": 12,
+          "current": 11
+        },
+        "B": {
+          "max": 12,
+          "current": 7
+        },
+        "C": {
+          "max": 5,
+          "current": 0
+        },
+        "D": {
+          "max": 8,
+          "current": 7
+        },
+        "E": {
+          "max": 12,
+          "current": 3
+        }
+      },
+      "goal": {
+        "jug": "E",
+        "amount": 1
+      },
+      "maxMoves": 12
+    }
+  ]
+}
