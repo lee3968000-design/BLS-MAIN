@@ -33,7 +33,6 @@
             <option value="lvl1">난이도 하 (물통 3개)</option>
             <option value="lvl2">난이도 상 (물통 3~4개)</option>
             <option value="lvl3">난이도 하 (물통 4개)</option>
-            <option value="lvl4">난이도 상 (물통 4~5개)</option>
         </select>
         <select id="problemSelect"></select>
         <button onclick="startProblem()">도전 시작</button>
@@ -187,7 +186,7 @@
     // 5. 사용자 입력 처리
     window.addAction = function(actionCode, displayWord) {
         if(userInputSequence.length >= currentProblem.maxMoves) {
-            alert(`제한 횟수(${currentProblem.maxMoves}회)를 초과했습니다. 다시 시도하세요.`);
+            alert(`제한 횟수(${currentProblem.maxMoves}회)를 초과했습니다. 초기화 후 다시 시도하세요.`);
             return;
         }
         userInputSequence.push({ code: actionCode, word: displayWord });
@@ -273,7 +272,8 @@
             moves: userInputSequence.length,
             timestamp: Date.now()
         }).then(() => {
-            // 저장 성공 시 다음 문제로 넘어갈 수 있도록 상태 유지
+            // 저장 성공 후 초기화
+            resetInput();
         }).catch(error => {
             console.error("Firebase 저장 오류:", error);
             alert("기록 저장 중 오류가 발생했습니다.");
